@@ -1,0 +1,198 @@
+name: Harden Gradle Repositories
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to patch'
+        required: false
+        default: 'fix/stable'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '11'
+
+      - name: Report the current repositories
+        run: |
+          set -euo pipefail
+          echo "--- build.gradle buildscript repositories ---"
+          sed -n '/buildscript/,/^}/p' build.gradle | sed -n '/repositories/,/}/p'
+          echo "--- app/build.gradle repositories ---"
+          sed -n '/^repositories/,/^}/p' app/build.gradle || echo "(none)"
+
+      - name: Replace jcenter with Maven Central plus a mirror
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import pathlib, re
+
+          MIRROR = "maven { url 'https://maven.aliyun.com/repository/jcenter' }"
+
+          def fix(path):
+              p = pathlib.Path(path)
+              if not p.exists():
+                  print(f"skip (missing): {path}")
+                  return
+              s = p.read_text(encoding="utf-8")
+              before = s
+
+              # jcenter() is retired; route through Maven Central and keep the
+              # legacy artifacts reachable through a mirror.
+              s = re.sub(r"^([ \t]*)jcenter\(\)[ \t]*$",
+                         lambda m: f"{m.group(1)}mavenCentral()\n{m.group(1)}{MIRROR}",
+                         s, flags=re.M)
+
+              # Collapse an accidental mavenCentral() + mirror duplicate.
+              s = re.sub(
+                  r"([ \t]*)mavenCentral\(\)\n[ \t]*" + re.escape(MIRROR) + r"\n[ \t]*mavenCentral\(\)\n",
+                  r"\1mavenCentral()\n\1" + MIRROR + "\n",
+                  s)
+
+              if s != before:
+                  p.write_text(s, encoding="utf-8")
+                  print(f"patched: {path}")
+              else:
+                  print(f"no change: {path}")
+
+          fix("build.gradle")
+          fix("app/build.gradle")
+          PY
+
+          echo "--- build.gradle after ---"
+          sed -n '/buildscript/,/^}/p' build.gradle | sed -n '/repositories/,/}/p'
+
+      - name: Make sure jitpack is present for the module
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import pathlib
+          p = pathlib.Path("app/build.gradle")
+          s = p.read_text(encoding="utf-8")
+          if "jitpack.io" in s:
+              print("jitpack already present")
+          else:
+              s = s.replace(
+                  "dependencies {",
+                  "repositories {\n"
+                  "    mavenCentral()\n"
+                  "    maven { url 'https://maven.aliyun.com/repository/jcenter' }\n"
+                  "    maven { url 'https://jitpack.io' }\n"
+                  "}\n\n"
+                  "dependencies {", 1)
+              p.write_text(s, encoding="utf-8")
+              print("added repositories block with jitpack")
+          PY
+
+      - name: Normalise the keystore probe
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import pathlib, re
+          p = pathlib.Path("app/build.gradle")
+          s = p.read_text(encoding="utf-8")
+
+          # The vendor keystore lives on a Windows machine that is not present,
+          # and file() on a Windows path throws on the Linux runner.
+          pat = re.compile(
+              r"[ \t]*def releaseKeystore = file\('[^']*'\)\n"
+              r".*?"
+              r"(?=[ \t]*compileOptions \{)", re.S)
+
+          m = pat.search(s)
+          if m:
+              key = re.search(r"keyAlias '([^']*)'", m.group(0))
+              key_pass = re.search(r"keyPassword '([^']*)'", m.group(0))
+              store_pass = re.search(r"storePassword '([^']*)'", m.group(0))
+              block = (
+                  "    // The vendor keystore lives on a Windows machine that is not present\n"
+                  "    // here, and file() on a Windows path throws on the Linux runner.\n"
+                  "    def releaseKeystoreFile = {\n"
+                  "        def win = new File('C:/Users/sitw2/Documents/keystore.jks')\n"
+                  "        def nix = new File('/opt/opss/keystore.jks')\n"
+                  "        if (win.exists()) return win\n"
+                  "        if (nix.exists()) return nix\n"
+                  "        return null\n"
+                  "    }()\n"
+                  "    signingConfigs {\n"
+                  "        if (releaseKeystoreFile != null) {\n"
+                  "            config {\n"
+                  f"                keyAlias '{key.group(1) if key else 'release'}'\n"
+                  f"                keyPassword '{key_pass.group(1) if key_pass else ''}'\n"
+                  "                storeFile releaseKeystoreFile\n"
+                  f"                storePassword '{store_pass.group(1) if store_pass else ''}'\n"
+                  "            }\n"
+                  "        }\n"
+                  "    }\n"
+              )
+              s = s[:m.start()] + block + s[m.end():]
+              print("keystore probe normalised")
+          else:
+              print("keystore probe already normalised")
+
+          s = re.sub(r"signingConfig\s+(?:signingConfigs\.config"
+                     r"|releaseKeystore\.exists\(\)\s*\?\s*signingConfigs\.config\s*:\s*null)",
+                     "signingConfig releaseKeystoreFile != null ? signingConfigs.config : null", s)
+          p.write_text(s, encoding="utf-8")
+          print("signingConfig references normalised")
+          PY
+          grep -n "releaseKeystoreFile" app/build.gradle | head -5
+
+      - name: Drop removed JVM flags
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import pathlib, re
+          p = pathlib.Path("gradle.properties")
+          s = p.read_text(encoding="utf-8")
+          s = re.sub(r"-XX:MaxPermSize=\d+[MmGg]?\s*", "", s)
+          # Keep each property once.
+          seen, out = set(), []
+          for line in s.splitlines():
+              m = re.match(r"^\s*([A-Za-z][\w.\-]*)\s*=", line)
+              if m:
+                  if m.group(1) in seen:
+                      continue
+                  seen.add(m.group(1))
+              out.append(line)
+          p.write_text("\n".join(out).rstrip() + "\n", encoding="utf-8")
+          PY
+          grep -vE "^\s*#|^\s*$" gradle.properties
+
+      - name: Verify the build script parses
+        run: |
+          set -euo pipefail
+          chmod +x gradlew
+          ./gradlew help --no-daemon > /tmp/help.log 2>&1 || {
+            echo "configure failed:"; tail -30 /tmp/help.log; exit 1; }
+          echo "build script parses cleanly"
+
+      - name: Commit
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add build.gradle app/build.gradle gradle.properties
+          git diff --cached --quiet || git commit -m "fix(ci): replace jcenter and make the keystore probe portable"
+          BRANCH="${{ inputs.branch }}"
+          for attempt in 1 2 3; do
+            if git push origin "HEAD:$BRANCH" 2>/dev/null; then
+              echo "pushed to $BRANCH"; break
+            fi
+            git pull --rebase --autostash origin "$BRANCH"
+            [ "$attempt" = "3" ] && echo "::warning::push did not land"
+          done
