@@ -26,22 +26,27 @@ jobs:
           gh run download "$RUN" -D dist --pattern 'opss-*'
           find dist -name '*.apk' -exec ls -la {} \;
 
-      - name: Confirm the file really is an installable APK
+      - name: Describe the package
         run: |
           set -uo pipefail
           APK=$(find dist -name '*.apk' | head -1)
-          test -n "$APK" || { echo "no apk to inspect"; exit 1; }
           file "$APK"
-          unzip -t "$APK" | tail -2
+          unzip -t "$APK" | tail -1
           AAPT=$(find "$ANDROID_HOME/build-tools" -name aapt -type f 2>/dev/null | sort | tail -1)
-          "$AAPT" dump badging "$APK" > badging.txt
+          "$AAPT" dump badging "$APK" > badging.txt 2>&1
           grep -E "^package|^sdkVersion|^targetSdkVersion|^application-label:|^native-code" badging.txt
-          echo "--- signature ---"
-          "$ANDROID_HOME/build-tools/31.0.0/apksigner" verify --print-certs "$APK" > certs.txt 2>&1
-          head -4 certs.txt
-          echo "--- native libs (ABI) ---"
+          echo "--- native libs ---"
           unzip -l "$APK" | awk '/lib\// {split($4,a,"/"); print a[2]}' | sort -u
-          echo "--- dex host scan ---"
+          echo "--- signature ---"
+          APKSIGNER=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort | tail -1)
+          "$APKSIGNER" verify --print-certs "$APK" > certs.txt 2>&1
+          head -4 certs.txt
+          echo "(describe done)"
+
+      - name: Scan the dex for the backend host
+        run: |
+          set -uo pipefail
+          APK=$(find dist -name '*.apk' | head -1)
           mkdir -p x && cd x && unzip -o -q "../$APK" 'classes*.dex'
           cat classes*.dex > all.dex
           for host in taxi.ecardo.ir alaadcin.com 192.168.1.141; do
@@ -52,5 +57,6 @@ jobs:
             fi
           done
           echo "--- webservice endpoints ---"
-          grep -ao 'https\?://[a-zA-Z0-9./_-]*webservice_shark.php' all.dex | sort -u | head -5
+          grep -ao 'https://[a-zA-Z0-9./_-]*webservice_shark.php' all.dex | sort -u > endpoints.txt
+          cat endpoints.txt
           echo "(scan done)"
