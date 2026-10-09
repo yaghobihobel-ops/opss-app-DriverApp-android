@@ -59,8 +59,8 @@ android {
         applicationId "com.alaadcin.driver"
         minSdkVersion 17
         targetSdkVersion 31
-        versionCode 3
-        versionName "3.0"
+        versionCode 4
+        versionName "3.0.1"
         // Single source of truth for the backend address. Override per build
         // with -PSERVER_BASE_URL=https://host/ on the command line.
         buildConfigField "String", "SERVER_BASE_URL", "\"${serverBaseUrl}\""
