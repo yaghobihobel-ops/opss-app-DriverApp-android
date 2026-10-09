@@ -2,21 +2,29 @@ name: Verify APK
 
 on:
   workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to verify (blank = latest)'
+        required: false
+        default: ''
 
 jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
-      - name: Download the latest released APK
+      - name: Download the released APK
         run: |
           set -x
-          AUTH="Authorization: Bearer $GITHUB_TOKEN"
-          curl -sSL -H "$AUTH" \
-            https://api.github.com/repos/$GITHUB_REPOSITORY/releases/latest \
-            -o rel.json
-          URL=$(python3 -c "import json;r=json.load(open('rel.json'));print(next(a['browser_download_url'] for a in r['assets'] if a['name'].endswith('.apk')))")
+          TAG="${{ inputs.tag }}"
+          if [ -z "$TAG" ]; then
+            TAG=$(curl -sS https://api.github.com/repos/$GITHUB_REPOSITORY/releases/latest \
+              | python3 -c "import json,sys;print(json.load(sys.stdin)['tag_name'])")
+          fi
+          echo "tag=$TAG"
+          URL=$(curl -sS https://api.github.com/repos/$GITHUB_REPOSITORY/releases/tags/$TAG \
+            | python3 -c "import json,sys;r=json.load(sys.stdin);print(next(a['browser_download_url'] for a in r['assets'] if a['name'].endswith('.apk')))")
           echo "url=$URL"
-          curl -sSL -H "$AUTH" "$URL" -o app.apk
+          curl -sSL "$URL" -o app.apk
           ls -l app.apk
           file app.apk
       - name: Describe the package
@@ -36,7 +44,7 @@ jobs:
           echo "apksigner=$SIG"
           if [ -n "$SIG" ]; then
             "$SIG" verify --verbose --print-certs app.apk > sig.txt 2>&1 || true
-            head -20 sig.txt
+            head -25 sig.txt
           else
             echo "apksigner not found"
           fi
