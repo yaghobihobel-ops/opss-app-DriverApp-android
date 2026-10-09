@@ -1,44 +1,85 @@
-name: Check APK zip layout
+name: Verify APK
 
 on:
   workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to verify (blank = latest)'
+        required: false
+        default: ''
 
 jobs:
-  check:
+  verify:
     runs-on: ubuntu-latest
     steps:
-      - name: Download
+      - name: Download the released APK
         run: |
           set -x
-          TAG=$(curl -sS https://api.github.com/repos/$GITHUB_REPOSITORY/releases/latest \
-            | python3 -c "import json,sys;print(json.load(sys.stdin)['tag_name'])")
+          TAG="${{ inputs.tag }}"
+          if [ -z "$TAG" ]; then
+            TAG=$(curl -sS https://api.github.com/repos/$GITHUB_REPOSITORY/releases/latest \
+              | python3 -c "import json,sys;print(json.load(sys.stdin)['tag_name'])")
+          fi
+          echo "tag=$TAG"
           URL=$(curl -sS https://api.github.com/repos/$GITHUB_REPOSITORY/releases/tags/$TAG \
             | python3 -c "import json,sys;r=json.load(sys.stdin);print(next(a['browser_download_url'] for a in r['assets'] if a['name'].endswith('.apk')))")
-          echo "tag=$TAG url=$URL"
+          echo "url=$URL"
           curl -sSL "$URL" -o app.apk
           ls -l app.apk
-      - name: Compression + alignment of the two mandatory entries
+      - name: Manifest, signature and ABI
+        run: |
+          set -x
+          unzip -t app.apk > /dev/null && echo "zip integrity OK" || echo "zip integrity FAIL"
+          AAPT=$(find "$ANDROID_HOME/build-tools" -name aapt -type f | sort | tail -1)
+          "$AAPT" dump badging app.apk > badging.txt 2>&1 || true
+          grep -E "^(package|sdkVersion|targetSdkVersion|native-code)" badging.txt || true
+          unzip -l app.apk | grep -o 'lib/[a-z0-9_-]*/' | sort -u || true
+          SIG=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort | tail -1)
+          "$SIG" verify --verbose --print-certs app.apk > sig.txt 2>&1 || true
+          grep -E "Verified using v[123] |Number of signers|certificate DN" sig.txt || true
+      - name: Android 11 zip layout gate
         run: |
           python3 - <<'PY'
-          import zipfile, struct
+          import re, zipfile, struct, sys
+          badging = open('badging.txt', errors='replace').read()
+          m = re.search(r"targetSdkVersion:'(\d+)'", badging)
+          target = int(m.group(1)) if m else 0
+          print('targetSdkVersion =', target)
           z = zipfile.ZipFile('app.apk')
-          print('%-34s %-10s %12s %12s %10s' % ('entry', 'method', 'offset', 'modhdr', 'align4'))
+          f = open('app.apk', 'rb')
+          bad = []
           for name in ('AndroidManifest.xml', 'resources.arsc'):
               if name not in z.namelist():
-                  print(name, 'MISSING'); continue
+                  bad.append(name + ' MISSING'); continue
               info = z.getinfo(name)
-              # local header offset + 30 + length(name) + extra
-              f = open('app.apk', 'rb')
               f.seek(info.header_offset)
               hdr = f.read(30)
-              n, m = struct.unpack('<HH', hdr[26:30])
-              data_off = info.header_offset + 30 + n + m
-              method = {0: 'STORED', 8: 'DEFLATED'}.get(info.compress_type, str(info.compress_type))
-              print('%-34s %-10s %12d %12d %10s' % (
-                  name, method, data_off, data_off, 'OK' if data_off % 4 == 0 else 'MISALIGNED'))
-          methods = {}
-          for i in z.infolist():
-              methods[i.compress_type] = methods.get(i.compress_type, 0) + 1
-          print('compression methods used (0=STORED, 8=DEFLATED):', methods)
-          print('total entries:', len(z.infolist()))
+              n, m2 = struct.unpack('<HH', hdr[26:30])
+              off = info.header_offset + 30 + n + m2
+              stored = (info.compress_type == zipfile.ZIP_STORED)
+              aligned = (off % 4 == 0)
+              print('%-20s %-9s offset=%-10d align4=%s' % (
+                  name, 'STORED' if stored else 'DEFLATED', off, 'OK' if aligned else 'MISALIGNED'))
+              if target >= 30 and (not stored or not aligned):
+                  bad.append('%s must be STORED and 4-byte aligned for targetSdk>=30' % name)
+          for b in bad:
+              print('FAIL:', b)
+          # A truncated download is the other cause of the install failure, so
+          # check the central directory actually closes the file.
+          last = z.infolist()[-1]
+          end = last.header_offset
+          f.seek(0, 2)
+          print('file size:', f.tell(), '| last entry offset:', end)
+          if end >= f.tell():
+              bad.append('central directory is truncated - the download was incomplete')
+          print('RESULT:', 'FAIL' if bad else 'PASS')
+          sys.exit(1 if bad else 0)
           PY
+      - name: Scan the dex for the backend host
+        run: |
+          set -x
+          rm -rf dex && mkdir dex
+          unzip -o -q app.apk 'classes*.dex' -d dex || true
+          for h in taxi.ecardo.ir alaadcin.com 192.168.1.141; do
+            if grep -r -a -q "$h" dex; then echo "FOUND $h"; else echo "absent $h"; fi
+          done
