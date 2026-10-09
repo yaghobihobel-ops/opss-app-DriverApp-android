@@ -81,8 +81,7 @@ public class MyApp extends Application {
     public void onCreate() {
         super.onCreate();
 
-        //   Utils.SERVER_CONNECTION_URL = CommonUtilities.SERVER_URL;
-        Utils.SERVER_CONNECTION_URL = "http://192.168.1.141/";
+        Utils.SERVER_CONNECTION_URL = BuildConfig.SERVER_BASE_URL;
 
         Utils.IS_APP_IN_DEBUG_MODE = BuildConfig.DEBUG ? "Yes" : "No";
         Utils.userType = BuildConfig.USER_TYPE;
