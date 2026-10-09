@@ -108,6 +108,30 @@ jobs:
           retention-days: 7
           if-no-files-found: warn
 
+      - name: Restore the support-library transitives Jetifier needs
+        if: always()
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import pathlib, re
+          p = pathlib.Path("app/build.gradle")
+          s = p.read_text(encoding="utf-8")
+
+          # A project library (com.view.MTextView, shipped inside one of the
+          # bundled .aar files) extends android.support.v7.widget.AppCompatTextView.
+          # Excluding the whole com.android.support group left that supertype
+          # unresolvable, so let Jetifier rewrite it instead.
+          before = s
+          s = s.replace("        // Legacy support-library transitives collide with AndroidX.\n"
+                        "        all*.exclude group: 'com.android.support'\n", "")
+          if s != before:
+              p.write_text(s, encoding="utf-8")
+              print("removed the com.android.support exclusion")
+          else:
+              print("no exclusion present")
+          PY
+          sed -n '/configurations {/,/}/p' app/build.gradle || true
+
       - name: Commit
         run: |
           set -euo pipefail
