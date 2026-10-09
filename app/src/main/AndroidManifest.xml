@@ -79,7 +79,8 @@
         android:resizeableActivity="false"
         android:supportsRtl="true"
         android:theme="@style/AppCompatTheme"
-        tools:replace="android:allowBackup">
+        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+        tools:replace="android:allowBackup,android:appComponentFactory">
 
 
         <uses-library

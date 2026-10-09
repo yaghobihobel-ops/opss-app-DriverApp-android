@@ -10,6 +10,8 @@ android {
     configurations {
         all*.exclude group: 'com.squareup.okhttp', module: 'okhttp'
         all*.exclude group: 'com.squareup.okhttp3', module: 'okhttp'
+        // Legacy support-library transitives collide with AndroidX.
+        all*.exclude group: 'com.android.support'
     }
     // The vendor keystore lives on a Windows machine that is not present
     // here, and file() on a Windows path throws on the Linux runner.
@@ -257,7 +259,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'com.ethanhua:skeleton:1.1.2'
     implementation 'io.supercharge:shimmerlayout:2.1.0'
-    implementation 'com.android.support:support-dynamic-animation:25.3.0'
+    implementation 'androidx.dynamicanimation:dynamicanimation:1.0.0'
 
 }
 apply plugin: 'com.google.gms.google-services'
