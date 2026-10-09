@@ -14,7 +14,7 @@ permissions:
 jobs:
   install:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     steps:
       - name: Checkout the working branch
         uses: actions/checkout@v4
@@ -70,6 +70,27 @@ jobs:
           print("de-duplicated")
           PY
           grep -vE "^\s*#|^\s*$" gradle.properties || true
+
+      - name: Set up JDK 11
+        if: always()
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '11'
+
+      - name: Capture the real compiler messages
+        if: always()
+        run: |
+          set -uo pipefail
+          chmod +x gradlew
+          ./gradlew :app:compileProdDebugKotlin --no-daemon --stacktrace --info > /tmp/kt.log 2>&1
+          echo "gradle exit: $?"
+          echo "--- compiler messages ---"
+          grep -E "^e: |^\s+e: " /tmp/kt.log | head -25 || echo "(none)"
+          echo "--- source file references ---"
+          grep -E "\.kt:[0-9]+:[0-9]+" /tmp/kt.log | head -20 || echo "(none)"
+          echo "--- what went wrong ---"
+          grep -A8 "What went wrong" /tmp/kt.log | head -16 || echo "(none)"
 
       - name: Commit
         run: |
