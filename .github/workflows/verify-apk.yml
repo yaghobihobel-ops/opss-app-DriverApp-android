@@ -1,62 +1,47 @@
-name: Verify Packaged APK
+name: Verify APK
 
 on:
   workflow_dispatch:
 
-permissions:
-  contents: read
-  actions: read
-
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Download the APK from the last successful build
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v4
+      - name: Download latest APK artifact
         run: |
-          set -euo pipefail
-          RUN=$(gh run list --workflow build.yml --status success --limit 1 --json databaseId --jq '.[0].databaseId')
-          echo "build run: $RUN"
-          mkdir -p dist
-          gh run download "$RUN" -D dist --pattern 'opss-*'
-          find dist -name '*.apk' -exec ls -la {} \;
-
+          set -x
+          ART=$(gh api /repos/$GITHUB_REPOSITORY/actions/artifacts --jq \
+            '[.artifacts[] | select(.name | test("apk"))] | sort_by(.created_at) | last | .id')
+          echo "artifact=$ART"
+          gh run download -n apk-dist -D dist || \
+          gh run download "$ART" -D dist
       - name: Describe the package
         run: |
-          set -uo pipefail
+          set -x
           APK=$(find dist -name '*.apk' | head -1)
+          echo "APK=$APK"
           file "$APK"
-          unzip -t "$APK" | tail -1
-          AAPT=$(find "$ANDROID_HOME/build-tools" -name aapt -type f 2>/dev/null | sort | tail -1)
-          "$AAPT" dump badging "$APK" > badging.txt 2>&1
-          grep -E "^package|^sdkVersion|^targetSdkVersion|^application-label:|^native-code" badging.txt
-          echo "--- native libs ---"
-          unzip -l "$APK" | awk '/lib\// {split($4,a,"/"); print a[2]}' | sort -u
-          echo "--- signature ---"
-          APKSIGNER=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort | tail -1)
-          "$APKSIGNER" verify --print-certs "$APK" > certs.txt 2>&1
-          head -4 certs.txt
-          echo "(describe done)"
-
+          unzip -t "$APK" > /dev/null && echo "zip integrity OK" || echo "zip integrity FAIL"
+          AAPT=$(find "$ANDROID_HOME/build-tools" -name aapt | sort | tail -1)
+          "$AAPT" dump badging "$APK" > badging.txt 2>&1 || true
+          grep -E "^(package|sdkVersion|targetSdkVersion|application-label|native-code)" badging.txt
+          unzip -l "$APK" | grep -o 'lib/[a-z0-9_-]*/' | sort -u
+          unzip -l "$APK" | grep -c 'META-INF/.*\.\(RSA\|SF\|MF\)' || true
+      - name: Signature check
+        run: |
+          set -x
+          APK=$(find dist -name '*.apk' | head -1)
+          SIG=$(find "$ANDROID_HOME/build-tools" -name apksigner | sort | tail -1)
+          echo "apksigner=$SIG"
+          if [ -n "$SIG" ]; then "$SIG" verify --print-certs "$APK" || echo "APKSIGNER FAILED"; else echo "no apksigner"; fi
       - name: Scan the dex for the backend host
         run: |
-          set -uo pipefail
+          set -x
           APK=$(find dist -name '*.apk' | head -1)
-          mkdir -p x && cd x && unzip -o -q "../$APK" 'classes*.dex'
-          cat classes*.dex > all.dex
-          for host in taxi.ecardo.ir alaadcin.com 192.168.1.141; do
-            if grep -qa "$host" all.dex; then
-              echo "FOUND    $host"
-            else
-              echo "absent   $host"
-            fi
+          rm -rf dex && mkdir dex
+          unzip -o -q "$APK" 'classes*.dex' -d dex || true
+          ls -l dex
+          for h in taxi.ecardo.ir alaadcin.com 192.168.1.141; do
+            if grep -r -a -q "$h" dex; then echo "FOUND $h"; else echo "absent $h"; fi
           done
-          echo "--- webservice endpoints ---"
-          grep -ao 'https://[a-zA-Z0-9./_-]*webservice_shark.php' all.dex | sort -u > endpoints.txt
-          cat endpoints.txt
-          echo "(scan done)"
