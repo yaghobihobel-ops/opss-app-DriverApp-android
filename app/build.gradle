@@ -56,9 +56,13 @@ android {
     compileSdkVersion 31
     buildToolsVersion '31.0.0'
     defaultConfig {
-        applicationId "com.alaadcin.driver"
+        applicationId "ir.ecardo.driver"
         minSdkVersion 17
-        targetSdkVersion 31
+        // Android 11+ refuses to install an APK whose AndroidManifest.xml is
+        // compressed (which is what AGP 3.5 emits); that surfaces as "There was a
+        // problem parsing the package". The strict check only applies from
+        // targetSdk 30, so 29 keeps the app installable on Android 11 and newer.
+        targetSdkVersion 29
         versionCode 11
         versionName "3.0.8"
         // Single source of truth for the backend address. Override per build
