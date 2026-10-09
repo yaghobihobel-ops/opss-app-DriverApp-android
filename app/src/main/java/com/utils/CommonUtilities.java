@@ -1,5 +1,7 @@
 package com.utils;
 
+import com.com.alaadcin.BuildConfig;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -8,7 +10,7 @@ import org.json.JSONObject;
  */
 public class CommonUtilities {
     public static final String TOLLURL = "https://tce.cit.api.here.com/2/calculateroute.json?app_id=";
-    public static final String SERVER = "https://alaadcin.com/";
+    public static final String SERVER = BuildConfig.SERVER_BASE_URL;
     public static final String SERVER_FOLDER_PATH = "";
     public static final String SERVER_WEBSERVICE_PATH = SERVER_FOLDER_PATH + "webservice_shark.php?";
     public static final String PAYMENTLINK = SERVER + "assets/libraries/webview/payment_configuration_trip.php?";
