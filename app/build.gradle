@@ -11,12 +11,23 @@ android {
         all*.exclude group: 'com.squareup.okhttp', module: 'okhttp'
         all*.exclude group: 'com.squareup.okhttp3', module: 'okhttp'
     }
+    // The vendor keystore lives on a Windows machine that is not present
+    // here, and file() on a Windows path throws on the Linux runner.
+    def releaseKeystoreFile = {
+        def win = new File('C:/Users/sitw2/Documents/keystore.jks')
+        def nix = new File('/opt/opss/keystore.jks')
+        if (win.exists()) return win
+        if (nix.exists()) return nix
+        return null
+    }()
     signingConfigs {
-        config {
-            keyAlias 'foodtakila'
-            keyPassword 'foodtakila'
-            storeFile file('C:\\Users\\sitw2\\Documents\\foodtakila.jks')
-            storePassword 'foodtakila'
+        if (releaseKeystoreFile != null) {
+            config {
+                keyAlias 'foodtakila'
+                keyPassword 'foodtakila'
+                storeFile releaseKeystoreFile
+                storePassword 'foodtakila'
+            }
         }
     }
     compileOptions {
@@ -48,7 +59,7 @@ android {
                 includeCompileClasspath true
             }
         }
-        signingConfig signingConfigs.config
+        signingConfig releaseKeystoreFile != null ? signingConfigs.config : null
     }
     flavorDimensions "default"
     dexOptions {
@@ -74,7 +85,7 @@ android {
             buildConfigField "String", "USER_ID_KEY", "\"iDriverId\""
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.config
+            signingConfig releaseKeystoreFile != null ? signingConfigs.config : null
         }
         debug {
             debuggable false
@@ -82,7 +93,7 @@ android {
             buildConfigField "String", "USER_ID_KEY", "\"iDriverId\""
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.config
+            signingConfig releaseKeystoreFile != null ? signingConfigs.config : null
         }
     }
     dexOptions {
