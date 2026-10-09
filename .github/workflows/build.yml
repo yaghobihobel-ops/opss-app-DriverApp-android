@@ -189,7 +189,8 @@ jobs:
           # reports the real outcome instead of faking a pass.
           emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -gpu swiftshader_indirect -camera-back none
           script: |
-            set -euo pipefail
+            # This runs under /usr/bin/sh (dash), which has no `set -o pipefail`.
+            set -eu
             APK=$(find dist -name '*.apk' | head -1)
             echo "APK: $APK"
             adb install -r "$APK"
@@ -290,7 +291,8 @@ jobs:
           disable-animations: true
           emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -gpu swiftshader_indirect -camera-back none
           script: |
-            set -uo pipefail
+            # This runs under /usr/bin/sh (dash), which has no `set -o pipefail`.
+            set -eu
             APK=$(find dist -name '*.apk' | head -1)
             echo "APK: $APK"
             adb install -r -d "$APK" 2>&1 | tee install-result.txt
