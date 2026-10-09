@@ -1,0 +1,41 @@
+name: Verify Packaged APK
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Download the APK from the last successful build
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          RUN=$(gh run list --workflow build.yml --status success --limit 1 --json databaseId --jq '.[0].databaseId')
+          echo "run: $RUN"
+          mkdir -p dist
+          gh run download "$RUN" -D dist --pattern 'opss-*'
+          find dist -name '*.apk'
+
+      - name: Report which backend host the dex actually carries
+        run: |
+          set -uo pipefail
+          APK=$(find dist -name '*.apk' | head -1)
+          test -n "$APK" || { echo "no apk to inspect"; exit 0; }
+          mkdir -p x && cd x && unzip -o -q "../$APK" 'classes*.dex'
+          cat classes*.dex > all.dex
+          for host in taxi.ecardo.ir alaadcin.com 192.168.1.141; do
+            if grep -qa "$host" all.dex; then
+              echo "FOUND    $host"
+            else
+              echo "absent   $host"
+            fi
+          done
+          echo "--- webservice endpoints ---"
+          grep -ao 'https\?://[a-zA-Z0-9./_-]*webservice_shark.php' all.dex | sort -u | head
