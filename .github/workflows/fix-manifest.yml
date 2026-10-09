@@ -65,6 +65,7 @@ jobs:
                         "implementation 'androidx.dynamicanimation:dynamicanimation:1.0.0'")
           p.write_text(s, encoding="utf-8")
           PY
+          # `set -e` turns a non-matching grep into a step failure.
           grep -n "com.android.support" app/build.gradle || echo "no com.android.support left"
 
       - name: Resolve the manifest collision
@@ -113,7 +114,9 @@ jobs:
           print("manifest patched and parses cleanly")
           print("tools:replace =", values)
           PY
-          awk '/<application/,/\>/' app/src/main/AndroidManifest.xml | grep -E "appComponentFactory|tools:replace"
+          # A non-matching grep under `set -e` would abort the step, so allow it.
+          awk '/<application/,/\>/' app/src/main/AndroidManifest.xml | \
+            grep -E "appComponentFactory|tools:replace" || true
 
       - name: Verify the build script parses
         run: |
