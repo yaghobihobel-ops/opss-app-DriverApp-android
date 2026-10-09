@@ -7,7 +7,9 @@ apply plugin: 'realm-android'
 apply plugin: 'com.google.firebase.crashlytics'
 
 // Override from the CLI: ./gradlew assembleProdDebug -PSERVER_BASE_URL=https://host/
-ext.SERVER_BASE_URL = project.findProperty('SERVER_BASE_URL')
+// Resolved into a local so the android {} closures can read it; ext properties
+// are not visible from inside defaultConfig.
+def serverBaseUrl = project.findProperty('SERVER_BASE_URL') ?: 'https://taxi.ecardo.ir/'
 
 android {
     configurations {
@@ -61,8 +63,8 @@ android {
         versionName "3.0"
         // Single source of truth for the backend address. Override per build
         // with -PSERVER_BASE_URL=https://host/ on the command line.
-        buildConfigField "String", "SERVER_BASE_URL", "\"" + (ext.SERVER_BASE_URL ?: "https://taxi.ecardo.ir/") + "\""
-        buildConfigField "String", "API_BASE_URL", "\"" + (ext.SERVER_BASE_URL ?: "https://taxi.ecardo.ir/") + "webservice_shark.php\""
+        buildConfigField "String", "SERVER_BASE_URL", "\"${serverBaseUrl}\""
+        buildConfigField "String", "API_BASE_URL", "\"${serverBaseUrl}webservice_shark.php\""
         multiDexEnabled true
         // Every ABI ships in one fat APK; real phones only ever run two.
         ndk {
