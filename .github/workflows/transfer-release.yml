@@ -1,0 +1,98 @@
+name: Bootstrap From Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release tag holding the source zip'
+        required: true
+      asset_name:
+        description: 'Zip asset name inside that release'
+        required: true
+      target_branch:
+        description: 'Branch to import onto'
+        required: true
+        default: 'fix/stable'
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the target branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.target_branch }}
+          fetch-depth: 0
+
+      - name: Download the source zip from the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ inputs.release_tag }}
+          ASSET: ${{ inputs.asset_name }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/src
+          gh release download "$TAG" --pattern "$ASSET" --dir /tmp/src
+          ls -la /tmp/src
+
+      - name: Unzip and flatten into the repository root
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/unpack && mkdir -p /tmp/unpack
+          unzip -q /tmp/src/*.zip -d /tmp/unpack
+
+          ROOT=$(find /tmp/unpack -type f -name gradlew -printf '%h\n' | head -1)
+          if [ -z "$ROOT" ]; then
+            echo "ERROR: no gradlew found inside the uploaded zip"; exit 1
+          fi
+          echo "Gradle project root inside the zip: $ROOT"
+
+          # Keep the workflows we already manage; replace the source tree.
+          find . -mindepth 1 -maxdepth 1 ! -name '.git' ! -name '.github' -exec rm -rf {} +
+          cp -a "$ROOT"/. .
+          cp -a .github /tmp/gh 2>/dev/null || true
+
+          ls -la
+          test -f build.gradle      || { echo "ERROR: build.gradle missing"; exit 1; }
+          test -f settings.gradle   || { echo "ERROR: settings.gradle missing"; exit 1; }
+          test -d app/src/main/java || echo "WARNING: app/src/main/java not found"
+
+      - name: Clean build artefacts and local config
+        run: |
+          set -euo pipefail
+          rm -rf .gradle build app/build local.properties .idea app/prod
+          rm -f app/prod/release/output.json
+          find . -name '*.iml' -delete
+          find . -name '.DS_Store' -delete
+
+      - name: Commit
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Nothing to import."; exit 0
+          fi
+          git commit -m "chore: import Android source from release asset ${{ inputs.asset_name }}"
+          for attempt in 1 2 3; do
+            if git push origin "HEAD:${{ inputs.target_branch }}" 2>/dev/null; then
+              echo "pushed to ${{ inputs.target_branch }}"; break
+            fi
+            git pull --rebase --autostash origin "${{ inputs.target_branch }}"
+            [ "$attempt" = "3" ] && echo "::warning::push did not land"
+          done
+
+      - name: Summary
+        run: |
+          {
+            echo "### Imported"
+            echo ""
+            echo "- Asset: \`${{ inputs.asset_name }}\`"
+            echo "- Branch: \`${{ inputs.target_branch }}\`"
+            echo "- Files: $(git ls-files | wc -l)"
+            echo "- Commit: $(git rev-parse --short HEAD)"
+          } >> "$GITHUB_STEP_SUMMARY"
