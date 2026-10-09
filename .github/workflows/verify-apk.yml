@@ -7,41 +7,45 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Download latest APK artifact
+      - name: Download the latest released APK
         run: |
           set -x
-          ART=$(gh api /repos/$GITHUB_REPOSITORY/actions/artifacts --jq \
-            '[.artifacts[] | select(.name | test("apk"))] | sort_by(.created_at) | last | .id')
-          echo "artifact=$ART"
-          gh run download -n apk-dist -D dist || \
-          gh run download "$ART" -D dist
+          AUTH="Authorization: Bearer $GITHUB_TOKEN"
+          curl -sSL -H "$AUTH" \
+            https://api.github.com/repos/$GITHUB_REPOSITORY/releases/latest \
+            -o rel.json
+          URL=$(python3 -c "import json;r=json.load(open('rel.json'));print(next(a['browser_download_url'] for a in r['assets'] if a['name'].endswith('.apk')))")
+          echo "url=$URL"
+          curl -sSL -H "$AUTH" "$URL" -o app.apk
+          ls -l app.apk
+          file app.apk
       - name: Describe the package
         run: |
           set -x
-          APK=$(find dist -name '*.apk' | head -1)
-          echo "APK=$APK"
-          file "$APK"
-          unzip -t "$APK" > /dev/null && echo "zip integrity OK" || echo "zip integrity FAIL"
+          unzip -t app.apk > /dev/null && echo "zip integrity OK" || echo "zip integrity FAIL"
           AAPT=$(find "$ANDROID_HOME/build-tools" -name aapt | sort | tail -1)
-          "$AAPT" dump badging "$APK" > badging.txt 2>&1 || true
-          grep -E "^(package|sdkVersion|targetSdkVersion|application-label|native-code)" badging.txt
-          unzip -l "$APK" | grep -o 'lib/[a-z0-9_-]*/' | sort -u
-          unzip -l "$APK" | grep -c 'META-INF/.*\.\(RSA\|SF\|MF\)' || true
+          "$AAPT" dump badging app.apk > badging.txt 2>&1 || true
+          grep -E "^(package|sdkVersion|targetSdkVersion|application-label|native-code)" badging.txt || true
+          unzip -l app.apk | grep -o 'lib/[a-z0-9_-]*/' | sort -u || true
+          echo "v1 signature entries:"
+          unzip -l app.apk | grep -iE 'META-INF/.*\.(RSA|DSA|EC|SF)' || echo "NONE"
       - name: Signature check
         run: |
           set -x
-          APK=$(find dist -name '*.apk' | head -1)
           SIG=$(find "$ANDROID_HOME/build-tools" -name apksigner | sort | tail -1)
           echo "apksigner=$SIG"
-          if [ -n "$SIG" ]; then "$SIG" verify --print-certs "$APK" || echo "APKSIGNER FAILED"; else echo "no apksigner"; fi
+          if [ -n "$SIG" ]; then
+            "$SIG" verify --verbose --print-certs app.apk > sig.txt 2>&1 || true
+            head -20 sig.txt
+          else
+            echo "apksigner not found"
+          fi
       - name: Scan the dex for the backend host
         run: |
           set -x
-          APK=$(find dist -name '*.apk' | head -1)
           rm -rf dex && mkdir dex
-          unzip -o -q "$APK" 'classes*.dex' -d dex || true
-          ls -l dex
+          unzip -o -q app.apk 'classes*.dex' -d dex || true
+          ls -l dex || true
           for h in taxi.ecardo.ir alaadcin.com 192.168.1.141; do
             if grep -r -a -q "$h" dex; then echo "FOUND $h"; else echo "absent $h"; fi
           done
