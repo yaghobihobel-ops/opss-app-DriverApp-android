@@ -6,17 +6,35 @@ apply plugin: 'realm-android'
 // Apply the Crashlytics Gradle plugin
 apply plugin: 'com.google.firebase.crashlytics'
 
+// Override from the CLI: ./gradlew assembleProdDebug -PSERVER_BASE_URL=https://host/
+ext.SERVER_BASE_URL = project.findProperty('SERVER_BASE_URL')
+
 android {
     configurations {
         all*.exclude group: 'com.squareup.okhttp', module: 'okhttp'
         all*.exclude group: 'com.squareup.okhttp3', module: 'okhttp'
+        // Jetifier rewrites android.support.* references to their AndroidX
+        // equivalents, so keeping the original support jars on the classpath
+        // only produces duplicate classes at dex time. The AndroidX artifacts
+        // declared below take their place.
+        all*.exclude group: 'com.android.support'
     }
+    // The vendor keystore lives on a Windows machine that is not present here.
+    def releaseKeystoreFile = {
+        def win = new File('C:/Users/sitw2/Documents/foodtakila.jks')
+        def nix = new File('/opt/opss/foodtakila.jks')
+        if (win.exists()) return win
+        if (nix.exists()) return nix
+        return null
+    }()
     signingConfigs {
-        config {
-            keyAlias 'foodtakila'
-            keyPassword 'foodtakila'
-            storeFile file('C:\\Users\\sitw2\\Documents\\foodtakila.jks')
-            storePassword 'foodtakila'
+        if (releaseKeystoreFile != null) {
+            config {
+                keyAlias 'foodtakila'
+                keyPassword 'foodtakila'
+                storeFile releaseKeystoreFile
+                storePassword 'foodtakila'
+            }
         }
     }
     compileOptions {
@@ -41,14 +59,22 @@ android {
         targetSdkVersion 31
         versionCode 3
         versionName "3.0"
+        // Single source of truth for the backend address. Override per build
+        // with -PSERVER_BASE_URL=https://host/ on the command line.
+        buildConfigField "String", "SERVER_BASE_URL", "\"" + (ext.SERVER_BASE_URL ?: "https://taxi.ecardo.ir/") + "\""
+        buildConfigField "String", "API_BASE_URL", "\"" + (ext.SERVER_BASE_URL ?: "https://taxi.ecardo.ir/") + "webservice_shark.php\""
         multiDexEnabled true
+        // Every ABI ships in one fat APK; real phones only ever run two.
+        ndk {
+            abiFilters 'armeabi-v7a', 'arm64-v8a'
+        }
         vectorDrawables.useSupportLibrary = true
         javaCompileOptions {
             annotationProcessorOptions {
                 includeCompileClasspath true
             }
         }
-        signingConfig signingConfigs.config
+        signingConfig releaseKeystoreFile != null ? signingConfigs.config : null
     }
     flavorDimensions "default"
     dexOptions {
@@ -74,7 +100,7 @@ android {
             buildConfigField "String", "USER_ID_KEY", "\"iDriverId\""
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.config
+            signingConfig releaseKeystoreFile != null ? signingConfigs.config : null
         }
         debug {
             debuggable false
@@ -82,7 +108,7 @@ android {
             buildConfigField "String", "USER_ID_KEY", "\"iDriverId\""
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.config
+            signingConfig releaseKeystoreFile != null ? signingConfigs.config : null
         }
     }
     dexOptions {
@@ -246,7 +272,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'com.ethanhua:skeleton:1.1.2'
     implementation 'io.supercharge:shimmerlayout:2.1.0'
-    implementation 'com.android.support:support-dynamic-animation:25.3.0'
+    implementation 'androidx.dynamicanimation:dynamicanimation:1.0.0'
 
 }
 apply plugin: 'com.google.gms.google-services'
