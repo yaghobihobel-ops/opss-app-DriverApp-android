@@ -81,16 +81,32 @@ jobs:
       - name: Capture the real compiler messages
         if: always()
         run: |
-          set -uo pipefail
+          set +e
           chmod +x gradlew
           ./gradlew :app:compileProdDebugKotlin --no-daemon --stacktrace --info > /tmp/kt.log 2>&1
           echo "gradle exit: $?"
-          echo "--- compiler messages ---"
-          grep -E "^e: |^\s+e: " /tmp/kt.log | head -25 || echo "(none)"
-          echo "--- source file references ---"
-          grep -E "\.kt:[0-9]+:[0-9]+" /tmp/kt.log | head -20 || echo "(none)"
-          echo "--- what went wrong ---"
-          grep -A8 "What went wrong" /tmp/kt.log | head -16 || echo "(none)"
+
+          {
+            echo "--- compiler messages ---"
+            grep -E "^e: " /tmp/kt.log | head -25
+            echo "--- source references ---"
+            grep -E "\.kt:[0-9]+:[0-9]+" /tmp/kt.log | head -20
+            echo "--- what went wrong ---"
+            grep -A8 "What went wrong" /tmp/kt.log | head -16
+            echo "--- kotlin files ---"
+            find app/src -name '*.kt' | head -20
+          } | tee /tmp/kt-summary.txt
+
+          echo "summary written"
+
+      - name: Upload the compiler output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kotlin-compiler-output
+          path: /tmp/kt-summary.txt
+          retention-days: 7
+          if-no-files-found: warn
 
       - name: Commit
         run: |
