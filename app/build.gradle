@@ -66,9 +66,9 @@ android {
         buildConfigField "String", "SERVER_BASE_URL", "\"${serverBaseUrl}\""
         buildConfigField "String", "API_BASE_URL", "\"${serverBaseUrl}webservice_shark.php\""
         multiDexEnabled true
-        // Every ABI ships in one fat APK; real phones only ever run two.
+        // x86/x86_64 ship too, so the APK also installs on emulators.
         ndk {
-            abiFilters 'armeabi-v7a', 'arm64-v8a'
+            abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
         }
         vectorDrawables.useSupportLibrary = true
         javaCompileOptions {
@@ -76,7 +76,9 @@ android {
                 includeCompileClasspath true
             }
         }
-        signingConfig releaseKeystoreFile != null ? signingConfigs.config : null
+        // A null signingConfig overrides AGP's default debug signing and
+        // yields an unsigned APK, which the package installer refuses.
+        if (releaseKeystoreFile != null) signingConfig signingConfigs.config
     }
     flavorDimensions "default"
     dexOptions {
@@ -102,7 +104,9 @@ android {
             buildConfigField "String", "USER_ID_KEY", "\"iDriverId\""
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            signingConfig releaseKeystoreFile != null ? signingConfigs.config : null
+            // A null signingConfig overrides AGP's default debug signing and
+            // yields an unsigned APK, which the package installer refuses.
+            if (releaseKeystoreFile != null) signingConfig signingConfigs.config
         }
         debug {
             debuggable false
@@ -110,7 +114,9 @@ android {
             buildConfigField "String", "USER_ID_KEY", "\"iDriverId\""
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            signingConfig releaseKeystoreFile != null ? signingConfigs.config : null
+            // A null signingConfig overrides AGP's default debug signing and
+            // yields an unsigned APK, which the package installer refuses.
+            if (releaseKeystoreFile != null) signingConfig signingConfigs.config
         }
     }
     dexOptions {
