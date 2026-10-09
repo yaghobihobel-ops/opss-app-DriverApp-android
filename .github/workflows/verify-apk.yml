@@ -1,59 +1,44 @@
-name: Verify APK
+name: Check APK zip layout
 
 on:
   workflow_dispatch:
-    inputs:
-      tag:
-        description: 'Release tag to verify (blank = latest)'
-        required: false
-        default: ''
 
 jobs:
-  verify:
+  check:
     runs-on: ubuntu-latest
     steps:
-      - name: Download the released APK
+      - name: Download
         run: |
           set -x
-          TAG="${{ inputs.tag }}"
-          if [ -z "$TAG" ]; then
-            TAG=$(curl -sS https://api.github.com/repos/$GITHUB_REPOSITORY/releases/latest \
-              | python3 -c "import json,sys;print(json.load(sys.stdin)['tag_name'])")
-          fi
-          echo "tag=$TAG"
+          TAG=$(curl -sS https://api.github.com/repos/$GITHUB_REPOSITORY/releases/latest \
+            | python3 -c "import json,sys;print(json.load(sys.stdin)['tag_name'])")
           URL=$(curl -sS https://api.github.com/repos/$GITHUB_REPOSITORY/releases/tags/$TAG \
             | python3 -c "import json,sys;r=json.load(sys.stdin);print(next(a['browser_download_url'] for a in r['assets'] if a['name'].endswith('.apk')))")
-          echo "url=$URL"
+          echo "tag=$TAG url=$URL"
           curl -sSL "$URL" -o app.apk
           ls -l app.apk
-          file app.apk
-      - name: Describe the package
+      - name: Compression + alignment of the two mandatory entries
         run: |
-          set -x
-          unzip -t app.apk > /dev/null && echo "zip integrity OK" || echo "zip integrity FAIL"
-          AAPT=$(find "$ANDROID_HOME/build-tools" -name aapt | sort | tail -1)
-          "$AAPT" dump badging app.apk > badging.txt 2>&1 || true
-          grep -E "^(package|sdkVersion|targetSdkVersion|application-label|native-code)" badging.txt || true
-          unzip -l app.apk | grep -o 'lib/[a-z0-9_-]*/' | sort -u || true
-          echo "v1 signature entries:"
-          unzip -l app.apk | grep -iE 'META-INF/.*\.(RSA|DSA|EC|SF)' || echo "NONE"
-      - name: Signature check
-        run: |
-          set -x
-          SIG=$(find "$ANDROID_HOME/build-tools" -name apksigner | sort | tail -1)
-          echo "apksigner=$SIG"
-          if [ -n "$SIG" ]; then
-            "$SIG" verify --verbose --print-certs app.apk > sig.txt 2>&1 || true
-            head -25 sig.txt
-          else
-            echo "apksigner not found"
-          fi
-      - name: Scan the dex for the backend host
-        run: |
-          set -x
-          rm -rf dex && mkdir dex
-          unzip -o -q app.apk 'classes*.dex' -d dex || true
-          ls -l dex || true
-          for h in taxi.ecardo.ir alaadcin.com 192.168.1.141; do
-            if grep -r -a -q "$h" dex; then echo "FOUND $h"; else echo "absent $h"; fi
-          done
+          python3 - <<'PY'
+          import zipfile, struct
+          z = zipfile.ZipFile('app.apk')
+          print('%-34s %-10s %12s %12s %10s' % ('entry', 'method', 'offset', 'modhdr', 'align4'))
+          for name in ('AndroidManifest.xml', 'resources.arsc'):
+              if name not in z.namelist():
+                  print(name, 'MISSING'); continue
+              info = z.getinfo(name)
+              # local header offset + 30 + length(name) + extra
+              f = open('app.apk', 'rb')
+              f.seek(info.header_offset)
+              hdr = f.read(30)
+              n, m = struct.unpack('<HH', hdr[26:30])
+              data_off = info.header_offset + 30 + n + m
+              method = {0: 'STORED', 8: 'DEFLATED'}.get(info.compress_type, str(info.compress_type))
+              print('%-34s %-10s %12d %12d %10s' % (
+                  name, method, data_off, data_off, 'OK' if data_off % 4 == 0 else 'MISALIGNED'))
+          methods = {}
+          for i in z.infolist():
+              methods[i.compress_type] = methods.get(i.compress_type, 0) + 1
+          print('compression methods used (0=STORED, 8=DEFLATED):', methods)
+          print('total entries:', len(z.infolist()))
+          PY
