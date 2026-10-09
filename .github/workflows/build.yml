@@ -180,7 +180,7 @@ jobs:
         continue-on-error: true
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 29
+          api-level: 30
           arch: x86_64
           target: google_apis
           profile: Nexus 6
@@ -284,7 +284,7 @@ jobs:
         continue-on-error: true
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 29
+          api-level: 30
           arch: x86_64
           target: google_apis
           profile: Nexus 6
