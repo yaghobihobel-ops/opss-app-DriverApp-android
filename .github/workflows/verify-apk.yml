@@ -12,22 +12,37 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      # gh resolves the repository from git, so the checkout is what makes the
+      # following gh calls work at all.
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Download the APK from the last successful build
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           RUN=$(gh run list --workflow build.yml --status success --limit 1 --json databaseId --jq '.[0].databaseId')
-          echo "run: $RUN"
+          echo "build run: $RUN"
           mkdir -p dist
           gh run download "$RUN" -D dist --pattern 'opss-*'
-          find dist -name '*.apk'
+          find dist -name '*.apk' -exec ls -la {} \;
+
+      - name: Confirm the file really is an installable APK
+        run: |
+          set -uo pipefail
+          APK=$(find dist -name '*.apk' | head -1)
+          test -n "$APK" || { echo "no apk to inspect"; exit 1; }
+          file "$APK"
+          unzip -t "$APK" | tail -2
+          AAPT=$(find "$ANDROID_HOME/build-tools" -name aapt -type f 2>/dev/null | sort | tail -1)
+          "$AAPT" dump badging "$APK" | grep -E "^package|sdkVersion|targetSdkVersion|application-label" | head -4
+          "$ANDROID_HOME/build-tools/31.0.0/apksigner" verify --print-certs "$APK" | head -4
 
       - name: Report which backend host the dex actually carries
         run: |
           set -uo pipefail
           APK=$(find dist -name '*.apk' | head -1)
-          test -n "$APK" || { echo "no apk to inspect"; exit 0; }
           mkdir -p x && cd x && unzip -o -q "../$APK" 'classes*.dex'
           cat classes*.dex > all.dex
           for host in taxi.ecardo.ir alaadcin.com 192.168.1.141; do
