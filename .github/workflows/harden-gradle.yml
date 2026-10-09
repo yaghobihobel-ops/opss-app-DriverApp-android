@@ -107,11 +107,13 @@ jobs:
           s = p.read_text(encoding="utf-8")
 
           # The vendor keystore lives on a Windows machine that is not present,
-          # and file() on a Windows path throws on the Linux runner.
+          # and file() on a Windows path throws on the Linux runner. Driver and
+          # Passenger shipped slightly different blocks, so accept both shapes.
           pat = re.compile(
-              r"[ \t]*def releaseKeystore = file\('[^']*'\)\n"
+              r"[ \t]*signingConfigs \{\n"
               r".*?"
-              r"(?=[ \t]*compileOptions \{)", re.S)
+              r"([ \t]*)\}\n"
+              r"(?=[ \t]*(?:compileOptions|android \{))", re.S)
 
           m = pat.search(s)
           if m:
