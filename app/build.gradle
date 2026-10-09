@@ -13,6 +13,11 @@ android {
     configurations {
         all*.exclude group: 'com.squareup.okhttp', module: 'okhttp'
         all*.exclude group: 'com.squareup.okhttp3', module: 'okhttp'
+        // androidx.browser already provides these classes; the old
+        // support copies collide with it at dex time.
+        all*.exclude group: 'com.android.support', module: 'customtabs'
+        all*.exclude group: 'com.android.support', module: 'design'
+        all*.exclude group: 'com.android.support', module: 'appcompat-v7'
     }
     // The vendor keystore lives on a Windows machine that is not present
     // here, and file() on a Windows path throws on the Linux runner.
