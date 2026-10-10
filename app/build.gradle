@@ -9,7 +9,9 @@ apply plugin: 'com.google.firebase.crashlytics'
 // Override from the CLI: ./gradlew assembleProdDebug -PSERVER_BASE_URL=https://host/
 // Resolved into a local so the android {} closures can read it; ext properties
 // are not visible from inside defaultConfig.
-def serverBaseUrl = project.findProperty('SERVER_BASE_URL') ?: 'https://taxi.ecardo.ir/'
+def serverBaseUrl = project.findProperty('SERVER_BASE_URL') ?: 'https://opss.ir/'
+// Used only if opss.ir cannot be reached, e.g. while its DNS is down.
+def serverFallbackUrl = project.findProperty('SERVER_FALLBACK_URL') ?: 'http://46.100.58.20/'
 
 android {
     configurations {
@@ -56,7 +58,7 @@ android {
     compileSdkVersion 31
     buildToolsVersion '31.0.0'
     defaultConfig {
-        applicationId "ir.ecardo.driver"
+        applicationId "ir.opss.driver"
         // Android 5.0 (Lollipop) is the floor. Below that the support
         // libraries and Realm native code are no longer maintained by upstream.
         minSdkVersion 21
@@ -71,6 +73,7 @@ android {
         // with -PSERVER_BASE_URL=https://host/ on the command line.
         buildConfigField "String", "SERVER_BASE_URL", "\"${serverBaseUrl}\""
         buildConfigField "String", "API_BASE_URL", "\"${serverBaseUrl}webservice_shark.php\""
+        buildConfigField "String", "SERVER_FALLBACK_URL", "\"${serverFallbackUrl}\""
         multiDexEnabled true
         // x86/x86_64 ship too, so the APK also installs on emulators.
         ndk {
