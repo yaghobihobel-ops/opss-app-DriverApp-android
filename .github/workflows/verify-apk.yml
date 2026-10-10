@@ -83,3 +83,12 @@ jobs:
           for h in opss.ir alaadcin.com 46.100.58.20; do
             if grep -r -a -q "$h" dex; then echo "FOUND $h"; else echo "absent $h"; fi
           done
+      - name: Probe the backend the APK is configured to use
+        run: |
+          for h in opss.ir 46.100.58.20; do
+            code=$(curl -s -o /dev/null -m 20 -w '%{http_code}' "https://$h/webservice_shark.php" || echo 000)
+            body=$(curl -s -m 20 "https://$h/webservice_shark.php" | head -c 120 | tr '
+' ' ')
+            echo "$h -> HTTP $code"
+            echo "   body: $body"
+          done
