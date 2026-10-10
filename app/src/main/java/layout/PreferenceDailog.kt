@@ -7,7 +7,7 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.appcompat.app.AlertDialog
-import com.com.alaadcin.R
+import ir.opss.driver.R
 import com.general.files.GeneralFunctions
 import com.view.MTextView
 
