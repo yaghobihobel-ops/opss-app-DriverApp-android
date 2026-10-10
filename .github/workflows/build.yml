@@ -317,7 +317,7 @@ jobs:
             adb logcat -d > runtime-logcat.txt
             grep -E "FATAL EXCEPTION|ANR in|Force finishing" runtime-logcat.txt | head -20 || echo "(no crashes)"
             echo "--- app-specific log lines ---"
-            grep -E "$PKG|alaadcin|opss|SocketCluster|Firebase|Google.*API.*key" runtime-logcat.txt | tail -60 > app-lines.txt || true
+            grep -E "$PKG|opss|SocketCluster|Firebase|Google.*API.*key" runtime-logcat.txt | tail -60 > app-lines.txt || true
             cat app-lines.txt
             echo "--- crashes inside this package ---"
             if grep -E "FATAL EXCEPTION" runtime-logcat.txt | grep -q "$PKG"; then
