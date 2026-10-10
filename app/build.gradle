@@ -57,7 +57,9 @@ android {
     buildToolsVersion '31.0.0'
     defaultConfig {
         applicationId "ir.ecardo.driver"
-        minSdkVersion 17
+        // Android 5.0 (Lollipop) is the floor. Below that the support
+        // libraries and Realm native code are no longer maintained by upstream.
+        minSdkVersion 21
         // Android 11+ refuses to install an APK whose AndroidManifest.xml is
         // compressed (which is what AGP 3.5 emits); that surfaces as "There was a
         // problem parsing the package". The strict check only applies from
@@ -94,11 +96,15 @@ android {
             // to pre-dex each module and produce an APK that can be tested on
             // Android Lollipop without time consuming dex merging processes.
 
-            minSdkVersion 17
+            // Android 5.0 (Lollipop) is the floor. Below that the support
+        // libraries and Realm native code are no longer maintained by upstream.
+        minSdkVersion 21
         }
         prod {
             // The actual minSdkVersion for the application.
-            minSdkVersion 17
+            // Android 5.0 (Lollipop) is the floor. Below that the support
+        // libraries and Realm native code are no longer maintained by upstream.
+        minSdkVersion 21
         }
     }
     buildTypes {
