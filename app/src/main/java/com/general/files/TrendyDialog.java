@@ -10,7 +10,7 @@ import android.widget.LinearLayout;
 
 import androidx.annotation.Nullable;
 
-import com.com.alaadcin.R;
+import ir.opss.driver.R;
 import com.view.MTextView;
 
 public class TrendyDialog {

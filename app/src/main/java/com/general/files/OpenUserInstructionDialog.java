@@ -6,7 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ProgressBar;
 
-import com.com.alaadcin.R;
+import ir.opss.driver.R;
 import com.view.MTextView;
 
 import java.util.HashMap;

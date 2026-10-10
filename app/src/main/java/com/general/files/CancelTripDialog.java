@@ -3,7 +3,7 @@ package com.general.files;
 import android.content.Context;
 import android.location.Location;
 
-import com.com.alaadcin.ActiveTripActivity;
+import ir.opss.driver.ActiveTripActivity;
 import com.utils.Utils;
 
 import org.json.JSONObject;

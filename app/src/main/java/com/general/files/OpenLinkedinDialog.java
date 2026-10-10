@@ -10,7 +10,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 
-import com.com.alaadcin.R;
+import ir.opss.driver.R;
 import com.utils.CommonUtilities;
 import com.utils.Utils;
 import com.view.anim.loader.AVLoadingIndicatorView;

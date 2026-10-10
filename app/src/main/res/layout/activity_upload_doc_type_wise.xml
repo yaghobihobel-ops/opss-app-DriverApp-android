@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="#e8e8e8"
     android:orientation="vertical"
-    tools:context="com.com.alaadcin.com.sonix.driver.UploadDocTypeWiseActivity">
+    tools:context="ir.opss.driver.com.sonix.driver.UploadDocTypeWiseActivity">
 
     <include
         android:id="@+id/toolbar_include"

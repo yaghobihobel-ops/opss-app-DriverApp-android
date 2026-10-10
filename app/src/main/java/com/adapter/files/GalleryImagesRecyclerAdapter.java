@@ -10,7 +10,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import com.utils.Utilities;
-import com.com.alaadcin.R;
+import ir.opss.driver.R;
 import com.general.files.GeneralFunctions;
 import com.squareup.picasso.Picasso;
 import com.utils.Utils;

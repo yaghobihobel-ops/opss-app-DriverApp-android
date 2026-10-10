@@ -19,10 +19,10 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.countryview.view.CountryPicker;
-import com.com.alaadcin.AppLoignRegisterActivity;
-import com.com.alaadcin.ContactUsActivity;
-import com.com.alaadcin.ForgotPasswordActivity;
-import com.com.alaadcin.R;
+import ir.opss.driver.AppLoignRegisterActivity;
+import ir.opss.driver.ContactUsActivity;
+import ir.opss.driver.ForgotPasswordActivity;
+import ir.opss.driver.R;
 import com.general.files.ExecuteWebServerUrl;
 import com.general.files.GeneralFunctions;
 import com.general.files.OpenMainProfile;

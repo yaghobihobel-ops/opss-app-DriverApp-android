@@ -3,7 +3,7 @@ package com.general.files;
 import android.content.Context;
 import androidx.annotation.NonNull;
 
-import com.com.alaadcin.AppLoignRegisterActivity;
+import ir.opss.driver.AppLoignRegisterActivity;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;

@@ -17,7 +17,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.autofit.et.lib.AutoFitEditText;
-import com.com.alaadcin.R;
+import ir.opss.driver.R;
 import com.dialogs.OpenListView;
 import com.general.files.ExecuteWebServerUrl;
 import com.general.files.GeneralFunctions;

@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="#D9F3F3F3"
     android:scrollbarAlwaysDrawVerticalTrack="true"
-    tools:context="com.com.alaadcin.TripRatingActivity">
+    tools:context="ir.opss.driver.TripRatingActivity">
 
     <include
         android:id="@+id/toolbar_include"

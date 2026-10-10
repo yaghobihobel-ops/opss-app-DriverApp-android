@@ -9,9 +9,9 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
-import com.com.alaadcin.MainActivity;
-import com.com.alaadcin.R;
-import com.com.alaadcin.driver.LiveTaskListActivity;
+import ir.opss.driver.MainActivity;
+import ir.opss.driver.R;
+import ir.opss.driver.driver.LiveTaskListActivity;
 import com.view.MTextView;
 
 

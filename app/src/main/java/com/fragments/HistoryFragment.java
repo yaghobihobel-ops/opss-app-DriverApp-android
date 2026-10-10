@@ -22,12 +22,12 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 
 import com.adapter.files.MyHistoryRecycleAdapter;
-import com.com.alaadcin.BookingsActivity;
-import com.com.alaadcin.MainActivity;
-import com.com.alaadcin.MoreServiceInfoActivity;
-import com.com.alaadcin.R;
-import com.com.alaadcin.RideHistoryDetailActivity;
-import com.com.alaadcin.driver.LiveTaskListActivity;
+import ir.opss.driver.BookingsActivity;
+import ir.opss.driver.MainActivity;
+import ir.opss.driver.MoreServiceInfoActivity;
+import ir.opss.driver.R;
+import ir.opss.driver.RideHistoryDetailActivity;
+import ir.opss.driver.driver.LiveTaskListActivity;
 import com.dialogs.OpenListView;
 import com.general.files.AppFunctions;
 import com.general.files.ExecuteWebServerUrl;

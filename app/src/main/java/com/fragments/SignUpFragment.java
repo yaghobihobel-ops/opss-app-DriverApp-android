@@ -22,9 +22,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.countryview.view.CountryPicker;
-import com.com.alaadcin.AppLoignRegisterActivity;
-import com.com.alaadcin.R;
-import com.com.alaadcin.SupportActivity;
+import ir.opss.driver.AppLoignRegisterActivity;
+import ir.opss.driver.R;
+import ir.opss.driver.SupportActivity;
 import com.general.files.AppFunctions;
 import com.general.files.ExecuteWebServerUrl;
 import com.general.files.GeneralFunctions;

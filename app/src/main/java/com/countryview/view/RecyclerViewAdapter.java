@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.countryview.model.Country;
 
-import com.com.alaadcin.R;
+import ir.opss.driver.R;
 import com.general.files.KmStickyListener;
 import com.squareup.picasso.Picasso;
 import com.utils.Logger;

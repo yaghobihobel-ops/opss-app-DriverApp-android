@@ -1,6 +1,6 @@
 package com.utils;
 
-import com.com.alaadcin.BuildConfig;
+import ir.opss.driver.BuildConfig;
 
 import org.json.JSONException;
 import org.json.JSONObject;

@@ -25,7 +25,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
-import com.com.alaadcin.R;
+import ir.opss.driver.R;
 import com.general.files.GeneralFunctions;
 import com.general.files.RoundCornerDrawable;
 import com.model.deliverAll.orderItemDetailDataModel;

@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
-import com.com.alaadcin.R;
+import ir.opss.driver.R;
 import com.general.files.GeneralFunctions;
 import com.utils.Utils;
 import com.view.MButton;

@@ -3,7 +3,7 @@ package com.general.files;
 import android.content.Context;
 import android.os.Handler;
 
-import com.com.alaadcin.MainActivity;
+import ir.opss.driver.MainActivity;
 import com.pubnub.api.PNConfiguration;
 import com.pubnub.api.PubNub;
 import com.pubnub.api.callbacks.PNCallback;

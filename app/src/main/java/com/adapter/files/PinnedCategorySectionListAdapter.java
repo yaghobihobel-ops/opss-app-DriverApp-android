@@ -17,7 +17,7 @@ import android.widget.RelativeLayout;
 import android.widget.SectionIndexer;
 import android.widget.TextView;
 
-import com.com.alaadcin.R;
+import ir.opss.driver.R;
 import com.general.files.GeneralFunctions;
 import com.general.files.MyApp;
 import com.squareup.picasso.Picasso;

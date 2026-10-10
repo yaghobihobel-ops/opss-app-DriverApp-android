@@ -1,6 +1,6 @@
 package com.general.files;
 
-import com.com.alaadcin.BuildConfig;
+import ir.opss.driver.BuildConfig;
 import com.utils.CommonUtilities;
 import com.utils.Logger;
 import com.utils.Utils;

@@ -2,7 +2,7 @@ package com.general.files;
 
 import android.content.Context;
 
-import com.com.alaadcin.AppLoignRegisterActivity;
+import ir.opss.driver.AppLoignRegisterActivity;
 import com.view.MyProgressDialog;
 
 /**

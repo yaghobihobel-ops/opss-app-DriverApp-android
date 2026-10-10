@@ -10,7 +10,7 @@ import androidx.cardview.widget.CardView;
 import androidx.viewpager.widget.PagerAdapter;
 
 
-import com.com.alaadcin.R;
+import ir.opss.driver.R;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 import com.utils.Logger;

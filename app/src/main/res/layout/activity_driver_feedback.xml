@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="#EEEEEE"
     android:orientation="vertical"
-    tools:context="com.com.alaadcin.DriverFeedbackActivity">
+    tools:context="ir.opss.driver.DriverFeedbackActivity">
 
     <include
         android:id="@+id/toolbar_include"

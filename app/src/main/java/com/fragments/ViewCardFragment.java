@@ -16,8 +16,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.com.alaadcin.CardPaymentActivity;
-import com.com.alaadcin.R;
+import ir.opss.driver.CardPaymentActivity;
+import ir.opss.driver.R;
 import com.general.files.ExecuteWebServerUrl;
 import com.general.files.GeneralFunctions;
 import com.utils.Utils;
@@ -30,7 +30,7 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 
-import static com.com.alaadcin.R.id.demoText;
+import static ir.opss.driver.R.id.demoText;
 
 /**
  * A simple {@link Fragment} subclass.

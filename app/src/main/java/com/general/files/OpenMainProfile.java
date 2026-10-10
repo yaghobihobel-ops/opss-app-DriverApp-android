@@ -7,18 +7,18 @@ import android.os.Bundle;
 
 import androidx.core.app.ActivityCompat;
 
-import com.com.alaadcin.AccountverificationActivity;
-import com.com.alaadcin.ActiveTripActivity;
-import com.com.alaadcin.AdditionalChargeActivity;
-import com.com.alaadcin.AllPermissionsHandleActivity;
-import com.com.alaadcin.CollectPaymentActivity;
-import com.com.alaadcin.DriverArrivedActivity;
-import com.com.alaadcin.MainActivity;
+import ir.opss.driver.AccountverificationActivity;
+import ir.opss.driver.ActiveTripActivity;
+import ir.opss.driver.AdditionalChargeActivity;
+import ir.opss.driver.AllPermissionsHandleActivity;
+import ir.opss.driver.CollectPaymentActivity;
+import ir.opss.driver.DriverArrivedActivity;
+import ir.opss.driver.MainActivity;
 import android.Manifest;
-import com.com.alaadcin.SuspendedDriver_Activity;
-import com.com.alaadcin.TripRatingActivity;
-import com.com.alaadcin.ViewMultiDeliveryDetailsActivity;
-import com.com.alaadcin.driver.LiveTaskListActivity;
+import ir.opss.driver.SuspendedDriver_Activity;
+import ir.opss.driver.TripRatingActivity;
+import ir.opss.driver.ViewMultiDeliveryDetailsActivity;
+import ir.opss.driver.driver.LiveTaskListActivity;
 import com.utils.AnimateMarker;
 import com.utils.Utils;
 

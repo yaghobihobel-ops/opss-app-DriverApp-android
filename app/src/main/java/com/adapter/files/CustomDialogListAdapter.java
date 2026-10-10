@@ -12,7 +12,7 @@ import android.widget.LinearLayout;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.com.alaadcin.R;
+import ir.opss.driver.R;
 import com.utils.Logger;
 import com.view.MTextView;
 import com.view.anim.loader.AVLoadingIndicatorView;

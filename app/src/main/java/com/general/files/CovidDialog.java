@@ -18,7 +18,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 
-import com.com.alaadcin.R;
+import ir.opss.driver.R;
 import com.utils.Utils;
 import com.view.MButton;
 import com.view.MTextView;

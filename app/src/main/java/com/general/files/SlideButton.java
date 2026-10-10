@@ -14,7 +14,7 @@ import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
 import com.airbnb.lottie.LottieAnimationView;
-import com.com.alaadcin.R;
+import ir.opss.driver.R;
 import com.utils.Logger;
 import com.view.MTextView;
 

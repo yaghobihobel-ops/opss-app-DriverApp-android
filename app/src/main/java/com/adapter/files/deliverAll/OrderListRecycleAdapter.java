@@ -12,7 +12,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import com.utils.Utilities;
-import com.com.alaadcin.R;
+import ir.opss.driver.R;
 import com.general.files.GeneralFunctions;
 import com.model.deliverAll.liveTaskListDataModel;
 import com.squareup.picasso.Picasso;

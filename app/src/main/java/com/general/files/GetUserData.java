@@ -5,8 +5,8 @@ import android.content.Context;
 import android.os.Handler;
 import androidx.core.app.ActivityCompat;
 
-import com.com.alaadcin.AppLoginActivity;
-import com.com.alaadcin.BuildConfig;
+import ir.opss.driver.AppLoginActivity;
+import ir.opss.driver.BuildConfig;
 import com.utils.Utils;
 import com.view.GenerateAlertBox;
 

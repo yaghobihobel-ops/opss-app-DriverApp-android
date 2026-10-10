@@ -11,8 +11,8 @@ import android.view.Window;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
-import com.com.alaadcin.BuildConfig;
-import com.com.alaadcin.R;
+import ir.opss.driver.BuildConfig;
+import ir.opss.driver.R;
 import com.utils.Logger;
 import com.view.GenerateAlertBox;
 import com.view.MTextView;

@@ -41,11 +41,11 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.adapter.files.CabTypeAdapter;
-import com.com.alaadcin.BuildConfig;
-import com.com.alaadcin.FareBreakDownActivity;
-import com.com.alaadcin.HailActivity;
-import com.com.alaadcin.R;
-import com.com.alaadcin.RentalDetailsActivity;
+import ir.opss.driver.BuildConfig;
+import ir.opss.driver.FareBreakDownActivity;
+import ir.opss.driver.HailActivity;
+import ir.opss.driver.R;
+import ir.opss.driver.RentalDetailsActivity;
 import com.general.files.AppFunctions;
 import com.general.files.ExecuteWebServerUrl;
 import com.general.files.GeneralFunctions;

@@ -6,12 +6,12 @@ import android.content.Intent;
 import android.location.Location;
 import android.view.View;
 
-import com.com.alaadcin.ActiveTripActivity;
-import com.com.alaadcin.DriverArrivedActivity;
+import ir.opss.driver.ActiveTripActivity;
+import ir.opss.driver.DriverArrivedActivity;
 
-import com.com.alaadcin.MainActivity;
-import com.com.alaadcin.R;
-import com.com.alaadcin.driver.TrackOrderActivity;
+import ir.opss.driver.MainActivity;
+import ir.opss.driver.R;
+import ir.opss.driver.driver.TrackOrderActivity;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.Dash;
 import com.google.android.gms.maps.model.Gap;

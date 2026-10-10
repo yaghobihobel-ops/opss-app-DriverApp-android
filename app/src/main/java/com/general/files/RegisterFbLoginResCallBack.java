@@ -3,7 +3,7 @@ package com.general.files;
 import android.content.Context;
 import android.os.Bundle;
 
-import com.com.alaadcin.AppLoignRegisterActivity;
+import ir.opss.driver.AppLoignRegisterActivity;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;

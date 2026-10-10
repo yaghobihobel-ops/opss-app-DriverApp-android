@@ -14,7 +14,7 @@ import android.widget.NumberPicker;
 import android.widget.NumberPicker.OnValueChangeListener;
 import android.widget.TimePicker;
 
-import com.com.alaadcin.R;
+import ir.opss.driver.R;
 
 
 /**

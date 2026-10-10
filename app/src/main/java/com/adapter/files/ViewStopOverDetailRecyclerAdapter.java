@@ -10,8 +10,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
-import com.com.alaadcin.R;
-import com.com.alaadcin.ViewStopOverDetailsActivity;
+import ir.opss.driver.R;
+import ir.opss.driver.ViewStopOverDetailsActivity;
 import com.general.files.GeneralFunctions;
 import com.view.MTextView;
 

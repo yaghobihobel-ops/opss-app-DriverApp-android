@@ -15,8 +15,8 @@ import android.os.Build;
 import android.provider.Settings;
 import androidx.core.app.NotificationCompat;
 
-import com.com.alaadcin.BuildConfig;
-import com.com.alaadcin.R;
+import ir.opss.driver.BuildConfig;
+import ir.opss.driver.R;
 import com.utils.Utils;
 
 /**

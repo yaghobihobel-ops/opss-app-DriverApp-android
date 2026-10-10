@@ -40,11 +40,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.adapter.files.WalletHistoryRecycleAdapter;
 import com.autofit.et.lib.AutoFitEditText;
-import com.com.alaadcin.CardPaymentActivity;
-import com.com.alaadcin.MainActivity;
-import com.com.alaadcin.MyWalletHistoryActivity;
-import com.com.alaadcin.R;
-import com.com.alaadcin.WithdrawBalanceActivity;
+import ir.opss.driver.CardPaymentActivity;
+import ir.opss.driver.MainActivity;
+import ir.opss.driver.MyWalletHistoryActivity;
+import ir.opss.driver.R;
+import ir.opss.driver.WithdrawBalanceActivity;
 import com.flutterwave.raveandroid.RaveConstants;
 import com.flutterwave.raveandroid.RavePayActivity;
 import com.flutterwave.raveandroid.RavePayManager;

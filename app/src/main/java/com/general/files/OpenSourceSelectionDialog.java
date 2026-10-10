@@ -17,8 +17,8 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.LinearLayout;
 
-import com.com.alaadcin.BuildConfig;
-import com.com.alaadcin.R;
+import ir.opss.driver.BuildConfig;
+import ir.opss.driver.R;
 import com.utils.Logger;
 import com.utils.Utils;
 import com.view.MButton;

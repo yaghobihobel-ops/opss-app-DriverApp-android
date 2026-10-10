@@ -6,7 +6,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:background="#F4F4F4"
-    tools:context="com.com.alaadcin.ListOfDocumentActivity">
+    tools:context="ir.opss.driver.ListOfDocumentActivity">
 
     <include
         android:id="@+id/toolbar_include"

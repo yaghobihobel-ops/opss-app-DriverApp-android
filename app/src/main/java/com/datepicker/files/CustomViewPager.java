@@ -9,7 +9,7 @@ import android.view.ViewConfiguration;
 import android.widget.DatePicker;
 import android.widget.TimePicker;
 
-import com.com.alaadcin.R;
+import ir.opss.driver.R;
 
 
 /**

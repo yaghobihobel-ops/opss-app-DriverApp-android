@@ -13,9 +13,9 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
 import com.adapter.files.NotificationAdapter;
-import com.com.alaadcin.NotificationActivity;
-import com.com.alaadcin.NotificationDetailsActivity;
-import com.com.alaadcin.R;
+import ir.opss.driver.NotificationActivity;
+import ir.opss.driver.NotificationDetailsActivity;
+import ir.opss.driver.R;
 import com.general.files.ExecuteWebServerUrl;
 import com.general.files.GeneralFunctions;
 import com.general.files.StartActProcess;

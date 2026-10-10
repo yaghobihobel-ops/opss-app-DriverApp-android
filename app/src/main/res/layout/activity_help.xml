@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="#EBEBEB"
     android:orientation="vertical"
-    tools:context="com.com.alaadcin.HelpActivity">
+    tools:context="ir.opss.driver.HelpActivity">
     <include
         android:id="@+id/toolbar_include"
         layout="@layout/design_toolbar_general" />

@@ -3,7 +3,7 @@ package com.general.files;
 import android.content.Context;
 
 
-import com.com.alaadcin.R;
+import ir.opss.driver.R;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;

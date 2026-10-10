@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import com.model.Delivery_Data;
-import com.com.alaadcin.R;
+import ir.opss.driver.R;
 import com.utils.Utils;
 import com.view.MTextView;
 

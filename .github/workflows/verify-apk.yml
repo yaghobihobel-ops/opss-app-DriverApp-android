@@ -80,6 +80,6 @@ jobs:
           set -x
           rm -rf dex && mkdir dex
           unzip -o -q app.apk 'classes*.dex' -d dex || true
-          for h in taxi.ecardo.ir alaadcin.com 192.168.1.141; do
+          for h in opss.ir alaadcin.com 46.100.58.20; do
             if grep -r -a -q "$h" dex; then echo "FOUND $h"; else echo "absent $h"; fi
           done

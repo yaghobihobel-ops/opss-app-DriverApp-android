@@ -22,11 +22,11 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
 import com.adapter.files.deliverAll.OrderHistoryRecycleAdapter;
-import com.com.alaadcin.BookingsActivity;
-import com.com.alaadcin.MainActivity;
-import com.com.alaadcin.R;
-import com.com.alaadcin.driver.LiveTaskListActivity;
-import com.com.alaadcin.driver.OrderDetailsActivity;
+import ir.opss.driver.BookingsActivity;
+import ir.opss.driver.MainActivity;
+import ir.opss.driver.R;
+import ir.opss.driver.driver.LiveTaskListActivity;
+import ir.opss.driver.driver.OrderDetailsActivity;
 import com.datepicker.files.SlideDateTimeListener;
 import com.datepicker.files.SlideDateTimePicker;
 import com.general.files.AppFunctions;

@@ -7,7 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.com.alaadcin.R;
+import ir.opss.driver.R;
 
 /**
  * A simple {@link Fragment} subclass.

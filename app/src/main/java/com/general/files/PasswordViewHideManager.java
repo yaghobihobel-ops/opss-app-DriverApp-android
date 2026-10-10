@@ -7,7 +7,7 @@ import android.view.MotionEvent;
 import android.view.View;
 
 
-import com.com.alaadcin.R;
+import ir.opss.driver.R;
 import com.utils.Logger;
 import com.view.editBox.MaterialEditText;
 

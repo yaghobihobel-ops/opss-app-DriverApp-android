@@ -9,7 +9,7 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.util.Log;
 
-import com.com.alaadcin.R;
+import ir.opss.driver.R;
 
 import java.io.FileInputStream;
 import java.io.IOException;

@@ -15,7 +15,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import com.utils.Utilities;
 import com.autofit.et.lib.AutoFitEditText;
-import com.com.alaadcin.R;
+import ir.opss.driver.R;
 import com.general.files.GeneralFunctions;
 import com.squareup.picasso.Picasso;
 import com.utils.Utils;

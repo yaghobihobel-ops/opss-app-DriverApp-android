@@ -9,7 +9,7 @@ import android.os.Build;
 import android.os.PowerManager;
 import android.view.ViewGroup;
 
-import com.com.alaadcin.MainActivity;
+import ir.opss.driver.MainActivity;
 import com.utils.Logger;
 
 /**

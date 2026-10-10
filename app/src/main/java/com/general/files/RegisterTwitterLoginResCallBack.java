@@ -2,7 +2,7 @@ package com.general.files;
 
 import android.content.Context;
 
-import com.com.alaadcin.AppLoignRegisterActivity;
+import ir.opss.driver.AppLoignRegisterActivity;
 import com.twitter.sdk.android.core.Callback;
 import com.twitter.sdk.android.core.Result;
 import com.twitter.sdk.android.core.TwitterCore;

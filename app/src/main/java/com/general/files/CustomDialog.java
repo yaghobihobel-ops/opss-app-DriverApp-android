@@ -18,7 +18,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
-import com.com.alaadcin.R;
+import ir.opss.driver.R;
 import com.utils.Utils;
 import com.view.CreateRoundedView;
 import com.view.MTextView;

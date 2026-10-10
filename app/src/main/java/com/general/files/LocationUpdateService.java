@@ -24,8 +24,8 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
-import com.com.alaadcin.BuildConfig;
-import com.com.alaadcin.R;
+import ir.opss.driver.BuildConfig;
+import ir.opss.driver.R;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;

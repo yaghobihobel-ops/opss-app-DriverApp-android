@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.com.alaadcin.com.sonix.driver.MaintenanceActivity">
+    tools:context="ir.opss.driver.com.sonix.driver.MaintenanceActivity">
 
     <ImageView
         android:id="@+id/imageMaintance"

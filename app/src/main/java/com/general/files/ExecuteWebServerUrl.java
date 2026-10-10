@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.AsyncTask;
 
-import com.com.alaadcin.BuildConfig;
+import ir.opss.driver.BuildConfig;
 import com.rest.RestClient;
 import com.utils.CommonUtilities;
 import com.utils.DeviceData;

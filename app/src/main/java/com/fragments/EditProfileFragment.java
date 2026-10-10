@@ -17,9 +17,9 @@ import android.widget.ImageView;
 import com.utils.Utilities;
 
 import com.countryview.view.CountryPicker;
-import com.com.alaadcin.MyProfileActivity;
-import com.com.alaadcin.R;
-import com.com.alaadcin.VerifyInfoActivity;
+import ir.opss.driver.MyProfileActivity;
+import ir.opss.driver.R;
+import ir.opss.driver.VerifyInfoActivity;
 import com.dialogs.OpenListView;
 import com.general.files.AppFunctions;
 import com.general.files.ExecuteWebServerUrl;

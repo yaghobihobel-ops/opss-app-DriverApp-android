@@ -9,11 +9,11 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
-import com.com.alaadcin.ActiveTripActivity;
-import com.com.alaadcin.CallScreenActivity;
-import com.com.alaadcin.ChatActivity;
-import com.com.alaadcin.DriverArrivedActivity;
-import com.com.alaadcin.R;
+import ir.opss.driver.ActiveTripActivity;
+import ir.opss.driver.CallScreenActivity;
+import ir.opss.driver.ChatActivity;
+import ir.opss.driver.DriverArrivedActivity;
+import ir.opss.driver.R;
 import com.sinch.android.rtc.calling.Call;
 import com.squareup.picasso.Picasso;
 import com.utils.CommonUtilities;

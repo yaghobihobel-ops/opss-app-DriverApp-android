@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="#F2F2F4"
     android:orientation="vertical"
-    tools:context="com.com.alaadcin.ViewMultiDeliveryDetailsActivity">
+    tools:context="ir.opss.driver.ViewMultiDeliveryDetailsActivity">
     <include
         android:id="@+id/toolbar_include"
         layout="@layout/design_toolbar_general" />

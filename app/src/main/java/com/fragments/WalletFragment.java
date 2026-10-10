@@ -13,8 +13,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.adapter.files.WalletHistoryRecycleAdapter;
-import com.com.alaadcin.MyWalletHistoryActivity;
-import com.com.alaadcin.R;
+import ir.opss.driver.MyWalletHistoryActivity;
+import ir.opss.driver.R;
 import com.general.files.ExecuteWebServerUrl;
 import com.general.files.GeneralFunctions;
 import com.utils.CommonUtilities;

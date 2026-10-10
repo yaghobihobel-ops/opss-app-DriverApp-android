@@ -21,8 +21,8 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.com.alaadcin.CabRequestedActivity;
-import com.com.alaadcin.R;
+import ir.opss.driver.CabRequestedActivity;
+import ir.opss.driver.R;
 import com.view.MButton;
 import com.view.MTextView;
 import com.view.MaterialRippleLayout;

@@ -6,7 +6,7 @@
     android:background="#F1F1F1"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.com.alaadcin.SearchLocationActivity">
+    tools:context="ir.opss.driver.SearchLocationActivity">
 
     <LinearLayout
         android:id="@+id/headerview"

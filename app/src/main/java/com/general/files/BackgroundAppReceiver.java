@@ -4,7 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import com.com.alaadcin.MainActivity;
+import ir.opss.driver.MainActivity;
 
 /**
  * Created by Admin on 17-02-2017.

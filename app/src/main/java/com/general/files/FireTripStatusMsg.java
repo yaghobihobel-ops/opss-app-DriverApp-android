@@ -4,9 +4,9 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 
-import com.com.alaadcin.CabRequestedActivity;
-import com.com.alaadcin.ChatActivity;
-import com.com.alaadcin.driver.LiveTrackOrderDetailActivity;
+import ir.opss.driver.CabRequestedActivity;
+import ir.opss.driver.ChatActivity;
+import ir.opss.driver.driver.LiveTrackOrderDetailActivity;
 import com.utils.CabRequestStatus;
 import com.utils.Logger;
 import com.utils.Utils;

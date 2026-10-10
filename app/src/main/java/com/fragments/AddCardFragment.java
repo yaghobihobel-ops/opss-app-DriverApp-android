@@ -20,8 +20,8 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
-import com.com.alaadcin.CardPaymentActivity;
-import com.com.alaadcin.R;
+import ir.opss.driver.CardPaymentActivity;
+import ir.opss.driver.R;
 import com.general.files.ExecuteWebServerUrl;
 import com.general.files.GeneralFunctions;
 import com.general.files.StartActProcess;

@@ -2,7 +2,7 @@ package com.utils;
 
 import android.util.Log;
 
-import com.com.alaadcin.BuildConfig;
+import ir.opss.driver.BuildConfig;
 
 public class Logger {
     public static void d(String title, String content) {

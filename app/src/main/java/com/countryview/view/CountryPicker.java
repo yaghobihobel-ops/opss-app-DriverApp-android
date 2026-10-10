@@ -22,7 +22,7 @@ import com.countryview.model.Country;
 import com.countryview.presenter.CountryPickerContractor;
 import com.countryview.presenter.CountryPickerPresenter;
 
-import com.com.alaadcin.R;
+import ir.opss.driver.R;
 import com.general.files.ExecuteWebServerUrl;
 import com.general.files.GeneralFunctions;
 import com.general.files.GetCountryList;

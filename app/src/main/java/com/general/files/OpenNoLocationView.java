@@ -11,10 +11,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
-import com.com.alaadcin.ActiveTripActivity;
-import com.com.alaadcin.DriverArrivedActivity;
-import com.com.alaadcin.MainActivity;
-import com.com.alaadcin.R;
+import ir.opss.driver.ActiveTripActivity;
+import ir.opss.driver.DriverArrivedActivity;
+import ir.opss.driver.MainActivity;
+import ir.opss.driver.R;
 import com.fragments.InactiveFragment;
 import com.utils.Logger;
 import com.utils.Utils;

@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:background="#ffffff"
     android:orientation="vertical"
-    tools:context="com.com.alaadcin.EmergencyContactActivity">
+    tools:context="ir.opss.driver.EmergencyContactActivity">
 
     <include
         android:id="@+id/toolbar_include"

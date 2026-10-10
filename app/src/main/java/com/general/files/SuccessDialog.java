@@ -9,7 +9,7 @@ import android.view.Window;
 import android.widget.LinearLayout;
 
 
-import com.com.alaadcin.R;
+import ir.opss.driver.R;
 import com.view.MButton;
 import com.view.MTextView;
 import com.view.MaterialRippleLayout;

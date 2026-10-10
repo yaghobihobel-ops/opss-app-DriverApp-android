@@ -10,8 +10,8 @@ import android.widget.LinearLayout;
 
 import androidx.appcompat.app.AlertDialog;
 
-import com.com.alaadcin.ContactUsActivity;
-import com.com.alaadcin.R;
+import ir.opss.driver.ContactUsActivity;
+import ir.opss.driver.R;
 import com.view.MTextView;
 
 public class PreferenceDailogJava {

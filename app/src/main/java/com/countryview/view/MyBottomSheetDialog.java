@@ -6,7 +6,7 @@ import android.view.View;
 import androidx.annotation.NonNull;
 
 
-import com.com.alaadcin.R;
+import ir.opss.driver.R;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 public class MyBottomSheetDialog extends BottomSheetDialog implements BaseView {

@@ -8,7 +8,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
-import com.com.alaadcin.IncomingCallScreenActivity;
+import ir.opss.driver.IncomingCallScreenActivity;
 import com.sinch.android.rtc.ClientRegistration;
 import com.sinch.android.rtc.NotificationResult;
 import com.sinch.android.rtc.Sinch;

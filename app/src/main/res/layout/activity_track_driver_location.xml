@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    tools:context="com.com.alaadcin.ActiveTripActivity">
+    tools:context="ir.opss.driver.ActiveTripActivity">
 
     <include
         android:id="@+id/toolbar_include"

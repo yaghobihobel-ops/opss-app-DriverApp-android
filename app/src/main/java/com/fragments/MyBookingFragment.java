@@ -19,7 +19,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.adapter.files.ViewPagerAdapter;
-import com.com.alaadcin.R;
+import ir.opss.driver.R;
 import com.dialogs.OpenListView;
 import com.general.files.GeneralFunctions;
 import com.general.files.GetLocationUpdates;
