@@ -67,8 +67,8 @@ android {
         // problem parsing the package". The strict check only applies from
         // targetSdk 30, so 29 keeps the app installable on Android 11 and newer.
         targetSdkVersion 29
-        versionCode 13
-        versionName "3.0.10"
+        versionCode 14
+        versionName "3.0.11"
         // Single source of truth for the backend address. Override per build
         // with -PSERVER_BASE_URL=https://host/ on the command line.
         buildConfigField "String", "SERVER_BASE_URL", "\"${serverBaseUrl}\""
