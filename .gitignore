@@ -6,3 +6,6 @@
 .DS_Store
 /build
 /captures
+
+# Local security-scanner state (Mimosa hook)
+.mimosa/
