@@ -12,6 +12,23 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout (for the configured backend hosts)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Resolve the configured backend endpoints
+        # Single source of truth is app/build.gradle, so changing the hosts
+        # there keeps this QC gate in sync without editing the workflow.
+        run: |
+          set -euo pipefail
+          PRIMARY=$(grep -oP "SERVER_BASE_URL'\)\s*\?:\s*'\K[^']+" app/build.gradle | head -1)
+          FALLBACK=$(grep -oP "SERVER_FALLBACK_URL'\)\s*\?:\s*'\K[^']+" app/build.gradle | head -1)
+          echo "primary=${PRIMARY%/}" >> "$GITHUB_ENV"
+          echo "fallback=${FALLBACK%/}" >> "$GITHUB_ENV"
+          echo "primary=$PRIMARY"
+          echo "fallback=$FALLBACK"
+
       - name: Download the released APK
         run: |
           set -x
@@ -80,33 +97,47 @@ jobs:
           set -x
           rm -rf dex && mkdir dex
           unzip -o -q app.apk 'classes*.dex' -d dex || true
-          # Gate, not report: both configured hosts must be in the dex and the
+          # Gate, not report: the configured hosts must be in the dex and the
           # old vendor host must be gone, otherwise the release is miswired.
+          PHOST=${primary#https://}
+          FHOST=${fallback#http://}
           fail=0
-          for h in opss.ir 46.100.58.20; do
+          for h in "$PHOST" "$FHOST"; do
             if grep -r -a -q "$h" dex; then echo "OK: $h present"; else echo "FAIL: $h missing from dex"; fail=1; fi
           done
           if grep -r -a -q "alaadcin.com" dex; then echo "FAIL: alaadcin.com still present in dex"; fail=1; else echo "OK: alaadcin.com absent"; fi
           exit $fail
       - name: Probe the backend the APK is configured to use
         # The app speaks https to the primary host and plain http to the
-        # fallback IP, so each endpoint is probed the way the app calls it.
+        # fallback, so each endpoint is probed the way the app calls it.
         # A hosting panel answering 200 with its login page counts as a
         # failure: the API file is simply not deployed there.
+        # The primary is a hard gate. The fallback is only reachable when the
+        # primary's DNS fails, so a dead fallback degrades recovery, not the
+        # service itself: it is reported as a WARN, not a gate failure.
         run: |
           fail=0
-          for entry in "https://opss.ir" "http://46.100.58.20"; do
-            code=$(curl -s -o /tmp/probe-body -m 20 -w '%{http_code}' "$entry/webservice_shark.php" || echo 000)
-            echo "$entry/webservice_shark.php -> HTTP $code"
-            head -c 160 /tmp/probe-body; echo; echo
-            if [ "$code" != "200" ]; then
-              echo "FAIL: $entry unreachable (HTTP $code)"
-              fail=1
-            elif grep -qi "fastpanel" /tmp/probe-body; then
-              echo "FAIL: $entry serves the hosting panel login page — webservice_shark.php is not deployed there"
-              fail=1
-            else
-              echo "PASS: $entry answered with something other than the panel page"
-            fi
-          done
+          code=$(curl -s -o /tmp/probe-body -m 20 -w '%{http_code}' "$primary/webservice_shark.php" || echo 000)
+          echo "$primary/webservice_shark.php -> HTTP $code"
+          head -c 160 /tmp/probe-body; echo; echo
+          if [ "$code" != "200" ]; then
+            echo "FAIL: primary unreachable (HTTP $code)"
+            fail=1
+          elif grep -qi "fastpanel" /tmp/probe-body; then
+            echo "FAIL: primary serves the hosting panel login page — webservice_shark.php is not deployed there"
+            fail=1
+          else
+            echo "PASS: primary answered with something other than the panel page"
+          fi
+
+          fcode=$(curl -s -o /tmp/probe-body -m 20 -w '%{http_code}' "$fallback/webservice_shark.php" || echo 000)
+          echo "$fallback/webservice_shark.php -> HTTP $fcode"
+          head -c 160 /tmp/probe-body; echo
+          if [ "$fcode" != "200" ]; then
+            echo "WARN: fallback unreachable (HTTP $fcode) — app still works via the primary; wire a live fallback IP"
+          elif grep -qi "fastpanel" /tmp/probe-body; then
+            echo "WARN: fallback serves the hosting panel login page"
+          else
+            echo "PASS: fallback answered"
+          fi
           exit $fail

@@ -11,6 +11,9 @@ apply plugin: 'com.google.firebase.crashlytics'
 // are not visible from inside defaultConfig.
 def serverBaseUrl = project.findProperty('SERVER_BASE_URL') ?: 'https://opss.ir/'
 // Used only if opss.ir cannot be reached, e.g. while its DNS is down.
+// PENDING (2026-10-11): the server moved to a new IP, so this default is
+// stale until the new origin IP is provided. Override with
+// -PSERVER_FALLBACK_URL=http://<new-ip>/ to make it live again.
 def serverFallbackUrl = project.findProperty('SERVER_FALLBACK_URL') ?: 'http://46.100.58.20/'
 
 android {

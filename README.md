@@ -13,6 +13,10 @@ A single source of truth in `app/build.gradle`:
 | `SERVER_BASE_URL`       | `https://opss.ir/`      | Primary backend (serves `webservice_shark.php`) |
 | `SERVER_FALLBACK_URL`   | `http://46.100.58.20/`  | Used only while the primary host is unreachable |
 
+> **2026-10-11:** the origin server moved to a new IP, so the fallback default
+> above is stale until the new IP is wired in. The primary domain is fronted by
+> Cloudflare, so the app only needs the fallback while DNS is unavailable.
+
 Override per build without touching the repo:
 
 ```bash
