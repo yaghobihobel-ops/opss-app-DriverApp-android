@@ -20,18 +20,75 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
-    name: Build debug APK
+  bump:
+    name: Bump version (releases only)
+    # The bump happens BEFORE the build so the released APK really contains
+    # the version its tag and asset name claim. Pushes to fix/** branches and
+    # manual dispatches build the tree as-is and never release.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 10
+    permissions:
+      contents: write
     outputs:
+      sha: ${{ steps.bump.outputs.sha }}
       version_name: ${{ steps.bump.outputs.name }}
       version_code: ${{ steps.bump.outputs.code }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.ref || github.ref_name }}
+          ref: main
+          fetch-depth: 0
+
+      - name: Bump the patch version
+        id: bump
+        run: |
+          set -euo pipefail
+          GRADLE=app/build.gradle
+          CURRENT_NAME=$(grep -oP 'versionName\s+"\K[^"]+' "$GRADLE" | head -1 | tr -d ' ')
+          CURRENT_CODE=$(grep -oP 'versionCode\s+\K[0-9]+' "$GRADLE" | head -1)
+
+          MAJ=$(echo "$CURRENT_NAME" | cut -d. -f1)
+          MIN=$(echo "$CURRENT_NAME" | cut -d. -f2)
+          PAT=$(echo "$CURRENT_NAME" | cut -d. -f3); PAT=${PAT:-0}
+          NEXT="$MAJ.$MIN.$((PAT + 1))"
+          NEXT_CODE=$((CURRENT_CODE + 1))
+
+          echo "current: $CURRENT_NAME (code $CURRENT_CODE) -> next: $NEXT (code $NEXT_CODE)"
+          sed -i -E "s/(versionName\s+\")[^\"]+(\")/\1$NEXT\2/" "$GRADLE"
+          sed -i -E "s/(versionCode\s+)[0-9]+/\1$NEXT_CODE/" "$GRADLE"
+
+          echo "name=$NEXT" >> "$GITHUB_OUTPUT"
+          echo "code=$NEXT_CODE" >> "$GITHUB_OUTPUT"
+
+      - name: Commit the bump without retriggering this workflow
+        id: commit
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/build.gradle
+          git commit -m "chore(release): bump to ${{ steps.bump.outputs.name }} (versionCode ${{ steps.bump.outputs.code }}) [skip ci]"
+          git push origin HEAD:main
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+  build:
+    name: Build debug APK
+    needs: [bump]
+    # bump is skipped on non-release events; build must still run there.
+    if: ${{ !cancelled() && (needs.bump.result == 'success' || needs.bump.result == 'skipped') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      version_name: ${{ steps.apk.outputs.name }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # On main pushes this is the bump commit, so the APK carries the
+          # version the release will publish; elsewhere the tree as-is.
+          ref: ${{ needs.bump.outputs.sha || inputs.ref || github.ref_name }}
 
       - name: Set up JDK 17 for the SDK tools
         uses: actions/setup-java@v4
@@ -373,9 +430,11 @@ jobs:
           fi
 
   release:
-    name: Bump version and publish release
-    needs: [ build, smoke-test, runtime-logs ]
-    if: github.ref == 'refs/heads/main' && github.actor != 'github-actions[bot]'
+    name: Publish release
+    needs: [ bump, build, smoke-test, runtime-logs ]
+    # bump carries the version; without it (fix/** pushes, manual dispatches,
+    # bot-triggered runs) there is nothing to release.
+    if: needs.bump.result == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -386,7 +445,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: main
+          ref: ${{ needs.bump.outputs.sha }}
           fetch-depth: 0
 
       - name: Set up Java for the release tooling
@@ -394,36 +453,6 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-
-      - name: Bump the patch version
-        id: bump
-        run: |
-          set -euo pipefail
-          GRADLE=app/build.gradle
-          CURRENT_NAME=$(grep -oP 'versionName\s+"\K[^"]+' "$GRADLE" | head -1 | tr -d ' ')
-          CURRENT_CODE=$(grep -oP 'versionCode\s+\K[0-9]+' "$GRADLE" | head -1)
-
-          MAJ=$(echo "$CURRENT_NAME" | cut -d. -f1)
-          MIN=$(echo "$CURRENT_NAME" | cut -d. -f2)
-          PAT=$(echo "$CURRENT_NAME" | cut -d. -f3); PAT=${PAT:-0}
-          NEXT="$MAJ.$MIN.$((PAT + 1))"
-          NEXT_CODE=$((CURRENT_CODE + 1))
-
-          echo "current: $CURRENT_NAME (code $CURRENT_CODE) -> next: $NEXT (code $NEXT_CODE)"
-          sed -i -E "s/(versionName\s+\")[^\"]+(\")/\1$NEXT\2/" "$GRADLE"
-          sed -i -E "s/(versionCode\s+)[0-9]+/\1$NEXT_CODE/" "$GRADLE"
-
-          echo "name=$NEXT" >> "$GITHUB_OUTPUT"
-          echo "code=$NEXT_CODE" >> "$GITHUB_OUTPUT"
-
-      - name: Commit the bump without retriggering this workflow
-        run: |
-          set -euo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add app/build.gradle
-          git commit -m "chore(release): bump to ${{ steps.bump.outputs.name }} (versionCode ${{ steps.bump.outputs.code }}) [skip ci]"
-          git push origin HEAD:main
 
       - name: Download the APK from this run
         env:
@@ -446,20 +475,23 @@ jobs:
       - name: Publish the APK to the matching release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VERSION: ${{ steps.bump.outputs.name }}
+          VERSION: ${{ needs.bump.outputs.version_name }}
         run: |
           set -euo pipefail
           TAG="v$VERSION"
           APK=$(find dist -name '*.apk' | head -1)
           test -n "$APK" || { echo "ERROR: no APK to publish"; exit 1; }
 
+          # The asset name must match the versionName inside this very APK —
+          # the build ran after the bump, so they are the same now.
           NAME="opss-${{ vars.APP_SLUG || 'passenger' }}-$VERSION.apk"
+          cp "$APK" "dist/$NAME"
 
           # A debug build is signed with the throwaway Android debug key, so it
           # will not install over an existing build signed with the vendor key.
           # Document that on the release page instead of failing silently.
           {
-            echo "**Version $VERSION** (versionCode ${{ steps.bump.outputs.code }})"
+            echo "**Version $VERSION** (versionCode ${{ needs.bump.outputs.version_code }})"
             echo ""
             echo "> **Install note:** this is a *debug* build, signed with the standard"
             echo "> Android debug key. If it will not install on your phone, uninstall the"
@@ -469,21 +501,21 @@ jobs:
             echo ""
             echo "### What changed and why"
             echo ""
-            git log "${{ github.event.before }}..${{ github.sha }}" --pretty='- %s (%h)' | head -30 || echo "- (initial)"
+            git log "${{ github.event.before }}..${{ needs.bump.outputs.sha }}" --pretty='- %s (%h)' | head -30 || echo "- (initial)"
             echo ""
             echo "### Files changed"
             echo ""
-            git diff --name-only "${{ github.event.before }}..${{ github.sha }}" | head -40 || true
+            git diff --name-only "${{ github.event.before }}..${{ needs.bump.outputs.sha }}" | head -40 || true
             echo ""
             echo "---"
-            echo "Built from \`main\` at \`${{ github.sha }}\`."
+            echo "Built from \`main\` at \`${{ needs.bump.outputs.sha }}\`."
           } > notes.md
 
           if gh release view "$TAG" > /dev/null 2>&1; then
-            gh release upload "$TAG" "$APK" --clobber
+            gh release upload "$TAG" "dist/$NAME" --clobber
             gh release edit "$TAG" --title "opss ${{ vars.APP_SLUG || 'passenger' }} $TAG" --notes-file notes.md
           else
-            gh release create "$TAG" "$APK" --title "opss ${{ vars.APP_SLUG || 'passenger' }} $TAG" --notes-file notes.md
+            gh release create "$TAG" "dist/$NAME" --title "opss ${{ vars.APP_SLUG || 'passenger' }} $TAG" --notes-file notes.md
           fi
           echo "https://github.com/${{ github.repository }}/releases/tag/$TAG"
 
@@ -492,6 +524,6 @@ jobs:
           {
             echo "### Release published"
             echo ""
-            echo "- Tag: \`v${{ steps.bump.outputs.name }}\`"
-            echo "- Asset: \`opss-${{ vars.APP_SLUG || 'passenger' }}-${{ steps.bump.outputs.name }}.apk\`"
+            echo "- Tag: \`v${{ needs.bump.outputs.version_name }}\`"
+            echo "- Asset: \`opss-${{ vars.APP_SLUG || 'passenger' }}-${{ needs.bump.outputs.version_name }}.apk\`"
           } >> "$GITHUB_STEP_SUMMARY"
